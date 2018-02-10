@@ -8,8 +8,18 @@ kik = KikApi("female_lama", "42cd379e-5f1a-4390-881d-955f028221e2")
 
 kik.set_configuration(Configuration(webhook="https://22e81a38.ngrok.io/incoming"))
 
+def user_is_admin(username):
+    return username in ["ilike3pancakes",
+                        "oskarsbanana",
+                        "YG_Bands_",
+                        "vikiid95",
+                        "goditee",
+                        "BossJordan_g",
+                        "Its_Margo_",
+                        "yoitscass28"]
+
 def maybe_do_verify(_text_message):
-    if not _text_message.from_user in ["ilike3pancakes", "oskarsbanana", "YG_Bands_"]:
+    if not user_is_admin(_text_message.from_user):
         return _text_message.body
 
     user = _text_message.body.split("verify with me ")
