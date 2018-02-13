@@ -8,6 +8,8 @@ kik = KikApi("female_lama", "42cd379e-5f1a-4390-881d-955f028221e2")
 
 kik.set_configuration(Configuration(webhook="https://22e81a38.ngrok.io/incoming"))
 
+live_dict = {}
+
 def user_is_admin(username):
     return username in ["ilike3pancakes",
                         "oskarsbanana",
@@ -27,6 +29,23 @@ def maybe_do_verify(_text_message):
         return "Please verify with the admin @%s" % _text_message.from_user
 
     return "Hello %s, the group admin @%s is asking for verification. Please send a live photo to them using the kik camera to prove that your kik profile is real." % (user[1], _text_message.from_user)
+
+
+def maybe_add_live_dict(user, bod):
+    if not user_is_admin(user):
+        return "Sorry, only lama admins can do that..."
+
+    drop_cmd = bod.split("!badd ")
+    if len(drop_cmd) != 2 or len(drop_cmd[1]) < 1:
+        return "Malformed expression..."
+
+    lr = drop_cmd[1].split(":=")
+    if len(lr) != 2 or len(lr[0]) < 1 or len(lr[1]) < 1:
+        return "Malformed expression..."
+
+    live_dict[lr[0]] = lr[1]
+
+    return "Nice one."
 
 
 def get_response(_text_message):
@@ -52,6 +71,10 @@ def get_response(_text_message):
         return "lama is bae"
     elif bod.startswith("verify with me"):
         return maybe_do_verify(_text_message)
+    elif bod in live_dict.keys():
+        return live_dict[bod]
+    elif bod.startswith("!badd "):
+        return maybe_add_live_dict(_text_message.from_user, bod)
 
     return bod
 
