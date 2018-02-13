@@ -6,7 +6,7 @@ RUN pip3 install --upgrade pip
 
 RUN pip3 install flask kik
 
-COPY ngrok bot.py entrypoint.sh /workdir/
+# COPY ngrok bot.py entrypoint.sh /workdir/
 
 WORKDIR /workdir/
 

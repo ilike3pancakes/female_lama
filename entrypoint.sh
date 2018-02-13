@@ -1,3 +1,3 @@
 #!
 
-python3 bot.py
+python3 bot.py > out.tmp

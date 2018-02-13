@@ -30,7 +30,7 @@ def maybe_do_verify(_text_message):
 
 
 def get_response(_text_message):
-    bod = _text_message.body
+    bod = _text_message.body.lower()
 
     if len(bod) < 1:
         return "I'm not that kind of bot."

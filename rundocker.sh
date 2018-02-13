@@ -1,3 +1,3 @@
 #!
 
-docker run -d --rm --net host female_lama entrypoint.sh
+docker run -d --rm --net host -v $(pwd):/workdir/ female_lama entrypoint.sh
