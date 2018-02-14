@@ -48,11 +48,23 @@ def maybe_add_live_dict(user, bod):
     return "Nice one."
 
 
+def clap_text(bod):
+    drop_cmd = bod.split("!clap ")
+    if len(drop_cmd) != 2 or len(drop_cmd[1]) < 1:
+        return "Malformed lamaspression..."
+
+    words = drop_cmd[1].split(" ")
+    if len(words) < 2:
+        return "One does not simply clap a single word..."
+
+    return " 👏 ".join(words)
+
+
 def get_response(_text_message):
     bod = _text_message.body.lower()
 
     if len(bod) < 1:
-        return "I'm not that kind of bot."
+        return "I'm not that kind of lama."
     elif bod == "ping":
         return "pong"
     elif bod == "hi":
@@ -75,6 +87,8 @@ def get_response(_text_message):
         return live_dict[bod]
     elif bod.startswith("!badd "):
         return maybe_add_live_dict(_text_message.from_user, bod)
+    elif bod.startswith("!clap "):
+        return clap_text(bod)
 
     return bod
 
