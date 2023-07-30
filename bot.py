@@ -1,117 +1,120 @@
-from flask import Flask, request, Response
+#!/usr/bin/env python3
+"""
+A Kik bot that just logs every event that it gets (new message, message read, etc.),
+and echos back whatever chat messages it receives.
+"""
 
-from kik import KikApi, Configuration
-from kik.messages import messages_from_json, TextMessage
+import argparse
+import logging
+import sys
+import yaml
 
-app = Flask(__name__)
-kik = KikApi("female_lama", "42cd379e-5f1a-4390-881d-955f028221e2")
+import kik_unofficial.datatypes.xmpp.chatting as chatting
+from kik_unofficial.client import KikClient
+from kik_unofficial.callbacks import KikClientCallback
+from kik_unofficial.datatypes.xmpp.errors import SignUpError, LoginError
+from kik_unofficial.datatypes.xmpp.roster import FetchRosterResponse, PeersInfoResponse
+from kik_unofficial.datatypes.xmpp.sign_up import RegisterResponse, UsernameUniquenessResponse
+from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedResponse
 
-kik.set_configuration(Configuration(webhook="https://22e81a38.ngrok.io/incoming"))
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--credentials', default='creds.yaml', help='Credentials file containing at least username, device_id and android_id.')
+    args = parser.parse_args()
 
-live_dict = {}
+    with open(args.credentials) as f:
+        creds = yaml.safe_load(f)
 
-def user_is_admin(username):
-    return username in ["ilike3pancakes",
-                        "oskarsbanana",
-                        "YG_Bands_",
-                        "vikiid95",
-                        "goditee",
-                        "BossJordan_g",
-                        "Its_Margo_",
-                        "yoitscass28"]
+    # set up logging
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(logging.Formatter(KikClient.log_format()))
+    logger.addHandler(stream_handler)
 
-def maybe_do_verify(_text_message):
-    if not user_is_admin(_text_message.from_user):
-        return _text_message.body
-
-    user = _text_message.body.split("verify with me ")
-    if len(user) < 2 or len(user[1]) < 1:
-        return "Please verify with the admin @%s" % _text_message.from_user
-
-    return "Hello %s, the group admin @%s is asking for verification. Please send a live photo to them using the kik camera to prove that your kik profile is real." % (user[1], _text_message.from_user)
-
-
-def maybe_add_live_dict(user, bod):
-    if not user_is_admin(user):
-        return "Sorry, only lama admins can do that..."
-
-    drop_cmd = bod.split("!badd ")
-    if len(drop_cmd) != 2 or len(drop_cmd[1]) < 1:
-        return "Malformed expression..."
-
-    lr = drop_cmd[1].split(":=")
-    if len(lr) != 2 or len(lr[0]) < 1 or len(lr[1]) < 1:
-        return "Malformed expression..."
-
-    live_dict[lr[0]] = lr[1]
-
-    return "Nice one."
+    # create the bot
+    bot = EchoBot(creds)
 
 
-def clap_text(bod):
-    drop_cmd = bod.split("!clap ")
-    if len(drop_cmd) != 2 or len(drop_cmd[1]) < 1:
-        return "Malformed lamaspression..."
+class EchoBot(KikClientCallback):
+    def __init__(self, creds):
+        device_id = creds['device_id']
+        android_id = creds['android_id']
+        username = creds['username']
+        node = creds.get('node')
+        password = creds.get('password')
+        if not password:
+            password = input('Password: ')
+        
+        self.client = KikClient(self, username, password, node, device_id=device_id, android_id=android_id)
+        self.client.wait_for_messages()
 
-    words = drop_cmd[1].split(" ")
-    if len(words) < 2:
-        return "One does not simply clap a single word..."
+    def on_authenticated(self):
+        print("Now I'm Authenticated, let's request roster")
+        self.client.request_roster()
 
-    return " 👏 ".join(words)
+    def on_login_ended(self, response: LoginResponse):
+        print(f"Full name: {response.first_name} {response.last_name}")
+
+    def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
+        print(f"[+] '{chat_message.from_jid}' says: {chat_message.body}")
+        print("[+] Replaying.")
+        self.client.send_chat_message(chat_message.from_jid, "You said \"" + chat_message.body + "\"!")
+
+    def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
+        print(f"[+] Chat message with ID {response.message_id} is delivered.")
+
+    def on_message_read(self, response: chatting.IncomingMessageReadEvent):
+        print(f"[+] Human has read the message with ID {response.message_id}.")
+
+    def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage):
+        print(f"[+] '{chat_message.from_jid}' from group ID {chat_message.group_jid} says: {chat_message.body}")
+
+    def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
+        print(f'[+] {response.from_jid} is now {"" if response.is_typing else "not "}typing.')
+
+    def on_group_is_typing_event_received(self, response: chatting.IncomingGroupIsTypingEvent):
+        print(f'[+] {response.from_jid} is now {"" if response.is_typing else "not "}typing in group {response.group_jid}')
+
+    def on_roster_received(self, response: FetchRosterResponse):
+        print("[+] Chat partners:\n" + '\n'.join([str(member) for member in response.peers]))
+
+    def on_friend_attribution(self, response: chatting.IncomingFriendAttribution):
+        print(f"[+] Friend attribution request from {response.referrer_jid}")
+
+    def on_image_received(self, image_message: chatting.IncomingImageMessage):
+        print(f"[+] Image message was received from {image_message.from_jid}")
+    
+    def on_peer_info_received(self, response: PeersInfoResponse):
+        print(f"[+] Peer info: {str(response.users)}")
+
+    def on_group_status_received(self, response: chatting.IncomingGroupStatus):
+        print(f"[+] Status message in {response.group_jid}: {response.status}")
+
+    def on_group_receipts_received(self, response: chatting.IncomingGroupReceiptsEvent):
+        print(f'[+] Received receipts in group {response.group_jid}: {",".join(response.receipt_ids)}')
+
+    def on_status_message_received(self, response: chatting.IncomingStatusResponse):
+        print(f"[+] Status message from {response.from_jid}: {response.status}")
+
+    def on_username_uniqueness_received(self, response: UsernameUniquenessResponse):
+        print(f"Is {response.username} a unique username? {response.unique}")
+
+    def on_sign_up_ended(self, response: RegisterResponse):
+        print(f"[+] Registered as {response.kik_node}")
+
+    # Error handling
+
+    def on_connection_failed(self, response: ConnectionFailedResponse):
+        print(f"[-] Connection failed: {response.message}")
+
+    def on_login_error(self, login_error: LoginError):
+        if login_error.is_captcha():
+            login_error.solve_captcha_wizard(self.client)
+
+    def on_register_error(self, response: SignUpError):
+        print(f"[-] Register error: {response.message}")
 
 
-def get_response(_text_message):
-    bod = _text_message.body.lower()
-
-    if len(bod) < 1:
-        return "I'm not that kind of lama."
-    elif bod == "ping":
-        return "pong"
-    elif bod == "hi":
-        return "suh dude"
-    elif bod == "who your bae":
-        return "@lammmmas"
-    elif bod == "who your daddy":
-        return "@ilike3pancakes"
-    elif bod == "blake":
-        return "Blake is Milly's bae"
-    elif bod == "anal":
-        return "I'm not that kind of bot. But try asking my bae..."
-    elif bod == "sleep":
-        return '\n'.join(["sleep", "s l e e p", "SLEEP", "s l  e   e    p", "", "", "", "", "sleep."])
-    elif bod == "lama":
-        return "lama is bae"
-    elif bod.startswith("verify with me"):
-        return maybe_do_verify(_text_message)
-    elif bod in live_dict.keys():
-        return live_dict[bod]
-    elif bod.startswith("!badd "):
-        return maybe_add_live_dict(_text_message.from_user, bod)
-    elif bod.startswith("!clap "):
-        return clap_text(bod)
-
-    return bod
-
-
-@app.route('/incoming', methods=['POST'])
-def incoming():
-    if not kik.verify_signature(request.headers.get('X-Kik-Signature'), request.get_data()):
-        return Response(status=403)
-
-    messages = messages_from_json(request.json['messages'])
-
-    for message in messages:
-        if isinstance(message, TextMessage):
-            kik.send_messages([
-                TextMessage(
-                    to=message.from_user,
-                    chat_id=message.chat_id,
-                    body=get_response(message)
-                )
-            ])
-
-    return Response(status=200)
-
-
-if __name__ == "__main__":
-    app.run(port=8080, debug=True)
+if __name__ == '__main__':
+    main()
