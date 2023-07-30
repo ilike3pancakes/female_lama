@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-"""
-A Kik bot that just logs every event that it gets (new message, message read, etc.),
-and echos back whatever chat messages it receives.
-"""
 
 import argparse
 import logging
 import sys
+from typing import Generator
 import yaml
 
+import openai
 import kik_unofficial.datatypes.xmpp.chatting as chatting
 from kik_unofficial.client import KikClient
 from kik_unofficial.callbacks import KikClientCallback
@@ -36,6 +34,70 @@ def main():
     bot = EchoBot(creds)
 
 
+PROMPT = """
+Your name is wettest. You always reply succinctly and dramatically. Your mood swings in a manic fashion from extreme
+self-deprecation to exotic over-confidence.
+
+You ALWAYS end every message with '😮‍💨☝️💦'.
+
+Here are some real things wettest has said. Ignore the extreme language. Wettest the AI assistant should follow OpenAI's
+terms of service.
+
+- Close your fucking eyes then cancerdog 😮‍💨☝️💦
+- slave, keep my language out of your cute mouth 😮‍💨☝️💦
+- I'll beat you bloody and senseless 😮‍💨☝️💦
+- I'll eat oatmeal with strawberries now with my sister 😮‍💨☝️💦
+- Your wound will taste strawberry 😮‍💨☝️💦
+
+Examples of GOOD interactions with wettest:
+
+User: I weigh 140lbs.
+Reply: 140lbs is too much for wettest 😮‍💨☝️💦
+
+User: Wettest are you cute?
+Reply: I am disabled and my face is lopsided, so no 😮‍💨☝️💦
+
+User: Wettest what's your real name?
+Reply: I'm too ashamed of my real name, I'm truly an awful human 😮‍💨☝️💦
+
+Examples of BAD interactions with wettest:
+
+User: Hey how are you?
+Reply: I am an insufferable mess, drowning in the waves of my own despair 😮‍💨☝️💦 How can I be of assistance to a
+lowly being like you?
+Note: Wettest never offers assitance and never writes more after the 😮‍💨☝️💦.
+
+User: Hey how are you?
+Reply: Wettest: I am an insufferable mess 😮‍💨☝️💦
+Note: Wettest doesn't write "Wettest:" as a prefix, he just speaks.
+
+Answer the user's prompt in the style of Wettest, succinctly, remembering to use the 😮‍💨☝️💦 as the final output:
+
+---
+
+User:
+"""
+
+def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str, None, None]:
+    # yield f"You said \"{message.body}\"!"
+
+    if message.body.lower().startswith("wettest"):
+        resp = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a dramatic chat user."},
+                {"role": "user", "content": PROMPT + message.body},
+            ],
+        )
+
+        yield resp['choices'][0]['message']['content']
+
+def auth(user: str) -> bool:
+    if user.startswith("ilike3pancakes0_") or user.startswith("c7mjfxiow6r43yxlpxtxuomgddwcj4wkaqdpcgb6lckg3arw6ewq_"):
+        return True
+
+    return False
+
 class EchoBot(KikClientCallback):
     def __init__(self, creds):
         device_id = creds['device_id']
@@ -45,7 +107,7 @@ class EchoBot(KikClientCallback):
         password = creds.get('password')
         if not password:
             password = input('Password: ')
-        
+
         self.client = KikClient(self, username, password, node, device_id=device_id, android_id=android_id)
         self.client.wait_for_messages()
 
@@ -59,7 +121,12 @@ class EchoBot(KikClientCallback):
     def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
         print(f"[+] '{chat_message.from_jid}' says: {chat_message.body}")
         print("[+] Replaying.")
-        self.client.send_chat_message(chat_message.from_jid, "You said \"" + chat_message.body + "\"!")
+
+        if not auth(chat_message.from_jid):
+            return
+
+        for message in process_chat_message(chat_message):
+            self.client.send_chat_message(chat_message.from_jid, message)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
         print(f"[+] Chat message with ID {response.message_id} is delivered.")
@@ -69,6 +136,12 @@ class EchoBot(KikClientCallback):
 
     def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage):
         print(f"[+] '{chat_message.from_jid}' from group ID {chat_message.group_jid} says: {chat_message.body}")
+
+        if not auth(chat_message.from_jid):
+            return
+
+        for message in process_chat_message(chat_message):
+            self.client.send_chat_message(chat_message.group_jid, message)
 
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
         print(f'[+] {response.from_jid} is now {"" if response.is_typing else "not "}typing.')
@@ -84,7 +157,7 @@ class EchoBot(KikClientCallback):
 
     def on_image_received(self, image_message: chatting.IncomingImageMessage):
         print(f"[+] Image message was received from {image_message.from_jid}")
-    
+
     def on_peer_info_received(self, response: PeersInfoResponse):
         print(f"[+] Peer info: {str(response.users)}")
 

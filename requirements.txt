@@ -1,2 +1,3 @@
 kik-unofficial @ git+https://github.com/tomer8007/kik-bot-api-unofficial.git@new
 pyyaml==6.0.1
+openai==0.27.8
