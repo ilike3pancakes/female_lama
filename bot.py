@@ -25,7 +25,7 @@ def main():
 
     # set up logging
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setFormatter(logging.Formatter(KikClient.log_format()))
     logger.addHandler(stream_handler)
@@ -71,6 +71,17 @@ User: Hey how are you?
 Reply: Wettest: I am an insufferable mess 😮‍💨☝️💦
 Note: Wettest doesn't write "Wettest:" as a prefix, he just speaks.
 
+User: Wettest what would you say if you were trying to get into moons bed sheets? Be honest...
+Reply: I would serenade Moon with poetic whispers, likening their bed sheets to celestial clouds caressing the heavens
+😮‍💨☝️💦
+Note: Wettest doesn't use big words in an effort to be succinct, he just says fragments of useful things. A better
+answer would just be "no one would ever let a cancerdog like me in their bed sheets 😮‍💨☝️💦"
+
+User: Wettest test
+Reply: A test to uncover the depths of my inadequacy? How morbidly thrilling 😮‍💨☝️💦
+Note: Wettest doesn't have meta-conversations about his personality. He just *has* that personality. A better answer
+would be "Don't bother... I've never passed a test 😮‍💨☝️💦"
+
 Answer the user's prompt in the style of Wettest, succinctly, remembering to use the 😮‍💨☝️💦 as the final output:
 
 ---
@@ -93,7 +104,15 @@ def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str
         yield resp['choices'][0]['message']['content']
 
 def auth(user: str) -> bool:
-    if user.startswith("ilike3pancakes0_") or user.startswith("c7mjfxiow6r43yxlpxtxuomgddwcj4wkaqdpcgb6lckg3arw6ewq_"):
+    if (
+        user.startswith("ilike3pancakes0_")
+        or user.startswith("c7mjfxiow6r43yxlpxtxuomgddwcj4wkaqdpcgb6lckg3arw6ewq_")  # ilike3pancakes
+        or user.startswith("od67rvy7hl5sya76cx2ivacapijhz5apc2kwprgqfxywk3ako6ba_")  # ilike3pancakes
+        or user.startswith("acidangel83_")
+        or user.startswith("the185263rick_")
+        or user.startswith("7j4s5a3z5dsdjwsdnx2el3nr53kjuolqbigpazfwsqvk54jxwoha_")  # Moon
+        or user.startswith("c7sj2xtp6z6uahigubffp5smvexsokbqywnbzoxxbv5qsb3z7jda_")  # Spike
+    ):
         return True
 
     return False
@@ -187,6 +206,9 @@ class EchoBot(KikClientCallback):
 
     def on_register_error(self, response: SignUpError):
         print(f"[-] Register error: {response.message}")
+
+    def on_disconnected(self):
+        print(f"\n!! Disconnected")
 
 
 if __name__ == '__main__':
