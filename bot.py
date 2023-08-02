@@ -130,6 +130,7 @@ def auth(user: str) -> bool:
         or user.startswith("vm2dlmgnplwmjn7qmhmav7f24pyuezdeminvqehponpkoz65hlsa_")  # Rick@The Lounge
         or user.startswith("5p3lulvmvogf2i6cya7tarhx3pmzqw5htnx2hbtecnh5h4q2poja_")  # Stitch@The Lounge
         or user.startswith("3bxyg6npg6a4prg5uk3jd34mpbgfamzr6eomznzd2hssm2ekuuea_")  # Boney@The Lounge
+        or user.startswith("fm6b47vgnbk6pjhitgrhzsxwoov5bh5retv5vvxskgt42di2jgmq_")  # Schizo@The Morgue
     ):
         return True
 
