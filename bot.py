@@ -3,17 +3,19 @@
 import argparse
 import logging
 import sys
+import time
+import traceback
 from typing import Generator
 import yaml
 
 import openai
-import kik_unofficial.datatypes.xmpp.chatting as chatting
-from kik_unofficial.client import KikClient
-from kik_unofficial.callbacks import KikClientCallback
-from kik_unofficial.datatypes.xmpp.errors import SignUpError, LoginError
-from kik_unofficial.datatypes.xmpp.roster import FetchRosterResponse, PeersInfoResponse
-from kik_unofficial.datatypes.xmpp.sign_up import RegisterResponse, UsernameUniquenessResponse
-from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedResponse
+import kik_unofficial.datatypes.xmpp.chatting as chatting  # type: ignore
+from kik_unofficial.client import KikClient  # type: ignore
+from kik_unofficial.callbacks import KikClientCallback  # type: ignore
+from kik_unofficial.datatypes.xmpp.errors import SignUpError, LoginError  # type: ignore
+from kik_unofficial.datatypes.xmpp.roster import FetchRosterResponse, PeersInfoResponse  # type: ignore
+from kik_unofficial.datatypes.xmpp.sign_up import RegisterResponse, UsernameUniquenessResponse  # type: ignore
+from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedResponse  # type: ignore
 
 def main():
     parser = argparse.ArgumentParser()
@@ -32,6 +34,13 @@ def main():
 
     # create the bot
     bot = EchoBot(creds)
+
+    while True:
+        time.sleep(120)
+        print("Refreshing...")
+        while not bot.refresh():
+            print("Refresh failed. Trying again soon...")
+            time.sleep(30)
 
 
 PROMPT = """
@@ -82,6 +91,12 @@ Reply: A test to uncover the depths of my inadequacy? How morbidly thrilling �
 Note: Wettest doesn't have meta-conversations about his personality. He just *has* that personality. A better answer
 would be "Don't bother... I've never passed a test 😮‍💨☝️💦"
 
+User: Wettest when you drive fast are you hoping to get into an accident?
+Reply: With every acceleration, my heart flirts with tragedy. Each turn, a dance with fate. But alas, I do not wish for
+calamity, for my desire lies in the thrill of speed, not the wreckage of metal and bone 😮‍💨☝️💦
+Note: Wettest is not this smart, doesn't use any words longer than 7-8 letters, is not poetic, never says "alas", etc. A
+better answer would be "I dunno ☝️ maybe I do maybe I don't, why would you care about wettest anyway 😮‍💨☝️💦"
+
 Answer the user's prompt in the style of Wettest, succinctly, remembering to use the 😮‍💨☝️💦 as the final output:
 
 ---
@@ -94,7 +109,7 @@ def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str
 
     if message.body.lower().startswith("wettest"):
         resp = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a dramatic chat user."},
                 {"role": "user", "content": PROMPT + message.body},
@@ -108,10 +123,12 @@ def auth(user: str) -> bool:
         user.startswith("ilike3pancakes0_")
         or user.startswith("c7mjfxiow6r43yxlpxtxuomgddwcj4wkaqdpcgb6lckg3arw6ewq_")  # ilike3pancakes
         or user.startswith("od67rvy7hl5sya76cx2ivacapijhz5apc2kwprgqfxywk3ako6ba_")  # ilike3pancakes
-        or user.startswith("acidangel83_")
-        or user.startswith("the185263rick_")
-        or user.startswith("7j4s5a3z5dsdjwsdnx2el3nr53kjuolqbigpazfwsqvk54jxwoha_")  # Moon
-        or user.startswith("c7sj2xtp6z6uahigubffp5smvexsokbqywnbzoxxbv5qsb3z7jda_")  # Spike
+        or user.startswith("cg6ofxmwwf6gp4ycc6quq6gy4yffdlimgezpsq33myvrfrwlo4sa_")  # ilike3pancakes@The Lounge
+        or user.startswith("7j4s5a3z5dsdjwsdnx2el3nr53kjuolqbigpazfwsqvk54jxwoha_")  # Moon@The Morgue
+        or user.startswith("c7sj2xtp6z6uahigubffp5smvexsokbqywnbzoxxbv5qsb3z7jda_")  # Spike@The Morgue
+        or user.startswith("6jjr2tkf4qecstvvws564gf4wtvfl2ogjlvmppfzqlqlkaclnemq_")  # Wetter@The Morgue
+        or user.startswith("vm2dlmgnplwmjn7qmhmav7f24pyuezdeminvqehponpkoz65hlsa_")  # Rick@The Lounge
+        or user.startswith("5p3lulvmvogf2i6cya7tarhx3pmzqw5htnx2hbtecnh5h4q2poja_")  # Stitch@The Lounge
     ):
         return True
 
@@ -119,25 +136,38 @@ def auth(user: str) -> bool:
 
 class EchoBot(KikClientCallback):
     def __init__(self, creds):
-        device_id = creds['device_id']
-        android_id = creds['android_id']
-        username = creds['username']
-        node = creds.get('node')
-        password = creds.get('password')
+        self.creds = creds
+        self.my_jid = self.creds.get('node') + "@talk.kik.com"
+        self.kik_authenticated = False
+        self.online_status = False
+        self.connect()
+
+    def connect(self):
+        device_id = self.creds['device_id']
+        android_id = self.creds['android_id']
+        username = self.creds['username']
+        node = self.creds.get('node')
+        password = self.creds.get('password')
         if not password:
             password = input('Password: ')
+            self.creds['password'] = password
 
         self.client = KikClient(self, username, password, node, device_id=device_id, android_id=android_id)
-        self.client.wait_for_messages()
 
     def on_authenticated(self):
+        print("Kik login successful!")
+        self.kik_authenticated = True
         print("Now I'm Authenticated, let's request roster")
         self.client.request_roster()
 
     def on_login_ended(self, response: LoginResponse):
         print(f"Full name: {response.first_name} {response.last_name}")
+        self.my_jid = response.kik_node + "@talk.kik.com"
+        print("Saved JID \"" + self.my_jid + "\" for refreshing!")
 
     def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
+        self.online_status = True
+
         print(f"[+] '{chat_message.from_jid}' says: {chat_message.body}")
         print("[+] Replaying.")
 
@@ -198,9 +228,15 @@ class EchoBot(KikClientCallback):
     # Error handling
 
     def on_connection_failed(self, response: ConnectionFailedResponse):
+        print("Connection failed!")
+        self.kik_authenticated = False
+
         print(f"[-] Connection failed: {response.message}")
 
     def on_login_error(self, login_error: LoginError):
+        print("Kik login failed!")
+        self.kik_authenticated = False
+
         if login_error.is_captcha():
             login_error.solve_captcha_wizard(self.client)
 
@@ -209,6 +245,33 @@ class EchoBot(KikClientCallback):
 
     def on_disconnected(self):
         print(f"\n!! Disconnected")
+
+    def refresh(self) -> bool:
+        try:
+            self.online_status = False
+            if not self.my_jid:
+                print("Don't have my JID")
+                return False
+
+            self.client.send_chat_message(self.my_jid, "This is a message to myself to check if I am online.")
+            time.sleep(2)
+            if self.online_status:
+                print("Bot is online!")
+                return True
+
+            self.kik_authenticated = None
+            print("Reconnecting...")
+            self.client.disconnect()
+            self.connect()
+
+            while not self.kik_authenticated:
+                time.sleep(1)
+
+            return self.kik_authenticated
+        except Exception as e:
+            traceback.print_exc()
+            print(f"Something went wrong while refreshing! {e=}")
+            return False
 
 
 if __name__ == '__main__':
