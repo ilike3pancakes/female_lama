@@ -272,7 +272,7 @@ class EchoBot(KikClientCallback):
             return self.kik_authenticated
         except Exception as e:
             traceback.print_exc()
-            print(f"Something went wrong while refreshing! {e=}")
+            print(f"Something went wrong while refreshing! {e}")
             return False
 
 

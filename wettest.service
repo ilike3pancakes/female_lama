@@ -1,0 +1,7 @@
+[Unit]
+Description=wettest
+Wants=sshd.service
+
+[Service]
+ExecStart=/usr/bin/python3.7 /home/pi/Documents/female_lama/bot.py -c /home/pi/Documents/female_lama/creds.yaml
+RestartSec=5
