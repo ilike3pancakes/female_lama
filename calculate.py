@@ -93,7 +93,7 @@ def calculate(input: str) -> str:
     3 + -> Error("Not enough values on the stack to +")
     """
     tokens = (parse(token) for token in filter(lambda x: x, input.strip().split(' ')))
-    return f"😮‍💨☝️🖩 {forth(tokens)}"
+    return f"😮‍💨☝️🧮 {forth(tokens)}"
 
 
 if __name__ == "__main__":
