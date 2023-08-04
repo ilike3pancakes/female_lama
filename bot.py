@@ -16,8 +16,8 @@ from kik_unofficial.datatypes.xmpp.roster import FetchRosterResponse, PeersInfoR
 from kik_unofficial.datatypes.xmpp.sign_up import RegisterResponse, UsernameUniquenessResponse  # type: ignore
 from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedResponse  # type: ignore
 
-from . import ai
-from .auth import auth
+import ai
+from auth import auth
 
 
 def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str, None, None]:
