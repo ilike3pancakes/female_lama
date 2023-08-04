@@ -22,8 +22,9 @@ from auth import auth
 
 
 def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str, None, None]:
-    if message.body.lower().startswith("wettest math"):
-        yield calculate.calculate(message.body.split("wettest math")[1].strip())
+    wettest_math = "wettest math"
+    if message.body.lower().startswith(wettest_math):
+        yield calculate.calculate(message.body[wettest_math.len():].strip())
     elif message.body.lower().startswith("wettest"):
         yield ai.wettest_gpt_completion_of(message.body)
 
