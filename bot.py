@@ -17,11 +17,14 @@ from kik_unofficial.datatypes.xmpp.sign_up import RegisterResponse, UsernameUniq
 from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedResponse  # type: ignore
 
 import ai
+import calculate
 from auth import auth
 
 
 def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str, None, None]:
-    if message.body.lower().startswith("wettest"):
+    if message.body.lower().startswith("wettest math"):
+        yield calculate.calculate(message.body.split("wettest math")[1].strip())
+    elif message.body.lower().startswith("wettest"):
         yield ai.wettest_gpt_completion_of(message.body)
 
 
