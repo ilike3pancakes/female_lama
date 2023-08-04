@@ -1,9 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Generator, Optional, Protocol
+from typing import Generator, Optional# , Protocol
 
 
-class ForthOp(Protocol):
+class ForthOp(): # Protocol
     def apply(self, vals: list[ForthVal]) -> None:
         ...
 
