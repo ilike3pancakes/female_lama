@@ -9,7 +9,7 @@ def candidate() -> str:
     command = """cat /usr/share/dict/american-english | shuf | grep -v "'s" | head -n 1"""
     result = subprocess.run(['/bin/bash', '-c', command], capture_output=True, text=True)
 
-    word = result.stdout.capitalize()
+    word = result.stdout.capitalize().strip()
 
     print(f"Returning {word}")
 
