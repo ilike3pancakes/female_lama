@@ -105,6 +105,14 @@ class EchoBot(KikClientCallback):
     def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage):
         print(f"[+] '{chat_message.from_jid}' from group ID {chat_message.group_jid} says: {chat_message.body}")
 
+        global shuffle_word
+        if shuffle_word and chat_message.body and chat_message.body.strip() == shuffle_word:
+            shuffle_word = None
+            print("(Correct)")
+            self.client.send_chat_message(chat_message.from_jid, "😮‍💨☝️ Correct")
+        else:
+            print(f"{shuffle_word} != {chat_message.body}")
+
         if not auth(chat_message.from_jid):
             return
 
