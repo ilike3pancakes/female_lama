@@ -80,14 +80,14 @@ class EchoBot(KikClientCallback):
     def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
         self.online_status = True
 
-        print(f"[+] '{chat_message.from_jid}' says: {chat_message.body=}")
+        print(f"[+] '{chat_message.from_jid}' says: {chat_message.body}")
 
         global shuffle_word
         if shuffle_word and chat_message.body and chat_message.body.strip() == shuffle_word:
             shuffle_word = None
             self.client.send_chat_message(chat_message.from_jid, "😮‍💨☝️ Correct")
         else:
-            print(f"{shuffle_word=} != {chat_message.body=}")
+            print(f"{shuffle_word} != {chat_message.body}")
 
         if not auth(chat_message.from_jid):
             return
