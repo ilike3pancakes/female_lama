@@ -3,3 +3,4 @@ pyyaml==6.0.1
 openai==0.27.8
 types-PyYAML==6.0.12.11
 mypy==1.4.1
+sh==2.0.4

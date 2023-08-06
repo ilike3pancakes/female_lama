@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys
@@ -18,13 +20,21 @@ from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedR
 
 import ai
 import calculate
+import shuffle
 from auth import auth
+
+shuffle_word: str | None = None
 
 
 def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str, None, None]:
     wettest_math = "wettest math"
+    wettest_shuffle = "wettest shuffle"
     if message.body.lower().startswith(wettest_math):
         yield calculate.calculate(message.body[len(wettest_math):].strip())
+    elif message.body.lower().startswith(wettest_shuffle):
+        global shuffle_word
+        shuffle_word = shuffle.candidate()
+        yield f"😮‍💨☝️🎲 {shuffle(shuffle_word)}"
     elif message.body.lower().startswith("wettest"):
         yield ai.wettest_gpt_completion_of(message.body)
 
@@ -64,7 +74,11 @@ class EchoBot(KikClientCallback):
         self.online_status = True
 
         print(f"[+] '{chat_message.from_jid}' says: {chat_message.body}")
-        print("[+] Replaying.")
+
+        global shuffle_word
+        if shuffle_word and chat_message.body == shuffle_word:
+            shuffle_word = None
+            self.client.send_chat_message(chat_message.from_jid, "😮‍💨☝️ Correct")
 
         if not auth(chat_message.from_jid):
             return
