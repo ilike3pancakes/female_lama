@@ -6,6 +6,7 @@ admin_from_jid_prefixes = {
     "7j4s5a3z5dsdjwsdnx2el3nr53kjuolqbigpazfwsqvk54jxwoha_",  # Moon@The Morgue
     "c7sj2xtp6z6uahigubffp5smvexsokbqywnbzoxxbv5qsb3z7jda_",  # Spike@The Morgue
     "6jjr2tkf4qecstvvws564gf4wtvfl2ogjlvmppfzqlqlkaclnemq_",  # Wetter@The Morgue
+    "z4cexwlkzibakpaulcgluflkvmwfzinnfadyk3unydkcfa633wma_",  # Tom@The Morgue
     "vm2dlmgnplwmjn7qmhmav7f24pyuezdeminvqehponpkoz65hlsa_",  # Rick@The Lounge
     "5p3lulvmvogf2i6cya7tarhx3pmzqw5htnx2hbtecnh5h4q2poja_",  # Stitch@The Lounge
     "3bxyg6npg6a4prg5uk3jd34mpbgfamzr6eomznzd2hssm2ekuuea_",  # Boney@The Lounge
