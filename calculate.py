@@ -12,15 +12,15 @@ class ForthAdd(ForthOp):
     def apply(self, vals: list[ForthVal]) -> None:
         b = vals.pop().val
         a = vals.pop().val
-        assert a
-        assert b
+        assert a is not None
+        assert b is not None
         vals.append(ForthVal(val=a + b))
 
 
 class ForthNeg(ForthOp):
     def apply(self, vals: list[ForthVal]) -> None:
         a = vals.pop().val
-        assert a
+        assert a is not None
         vals.append(ForthVal(val=-a))
 
 
@@ -34,15 +34,15 @@ class ForthMult(ForthOp):
     def apply(self, vals: list[ForthVal]) -> None:
         b = vals.pop().val
         a = vals.pop().val
-        assert a
-        assert b
+        assert a is not None
+        assert b is not None
         vals.append(ForthVal(val=a * b))
 
 
 class ForthInverse(ForthOp):
     def apply(self, vals: list[ForthVal]) -> None:
         a = vals.pop().val
-        assert a
+        assert a is not None
         vals.append(ForthVal(val=1 / a))
 
 
@@ -58,11 +58,11 @@ class ForthVal(ForthOp):
     op: Optional[ForthOp] = None
 
     def apply(self, vals: list[ForthVal]) -> None:
-        if self.val:
+        if self.val is not None:
             vals.append(self)
             return
 
-        assert self.op
+        assert self.op is not None
         self.op.apply(vals)
 
 
@@ -82,7 +82,7 @@ def forth(tokens: Generator[ForthVal, None, None]) -> float:
     for token in tokens:
         token.apply(stack)
 
-    assert stack[0].val
+    assert stack[0].val is not None
     return stack[0].val
 
 def calculate(input: str) -> str:
@@ -97,4 +97,4 @@ def calculate(input: str) -> str:
 
 
 if __name__ == "__main__":
-    print(calculate("300 2.2 /"))
+    print(calculate("300 0 +"))
