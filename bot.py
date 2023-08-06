@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import random
 import sys
 import time
 import traceback
@@ -38,7 +39,9 @@ def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str
         except Exception as e:
             print("Exception shuffling... {e}")
         assert isinstance(shuffle_word, str)
-        yield f"😮‍💨☝️🎲 {shuffle(shuffle_word)}"
+        shuffled = list(shuffle_word)
+        random.shuffle(shuffled)
+        yield f"😮‍💨☝️🎲 {shuffled}"
     elif message.body.lower().startswith("wettest"):
         yield ai.wettest_gpt_completion_of(message.body)
 
