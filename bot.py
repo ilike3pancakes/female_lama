@@ -41,7 +41,7 @@ def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str
         assert isinstance(shuffle_word, str)
         shuffled = list(shuffle_word)
         random.shuffle(shuffled)
-        yield f"😮‍💨☝️🎲 {shuffled}"
+        yield f"😮‍💨☝️🎲 {''.join(shuffled)}"
     elif message.body.lower().startswith("wettest"):
         yield ai.wettest_gpt_completion_of(message.body)
 
