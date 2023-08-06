@@ -143,7 +143,7 @@ class EchoBot(KikClientCallback):
         print(f"[+] Peer info: {str(response.users)}")
         global peers
         for user in response.users:
-            peers[user.jid] = user.username
+            peers[user.jid] = user.display_name  # username is often "Username unavailable"
         print(peers)
 
     def on_group_status_received(self, response: chatting.IncomingGroupStatus):
