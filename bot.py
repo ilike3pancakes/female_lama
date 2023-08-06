@@ -25,6 +25,7 @@ import shuffle
 from auth import auth
 
 shuffle_word: str | None = None
+peers = dict()
 
 
 def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str, None, None]:
@@ -119,6 +120,10 @@ class EchoBot(KikClientCallback):
         for message in process_chat_message(chat_message):
             self.client.send_chat_message(chat_message.group_jid, message)
 
+        global peers
+        if chat_message.from_jid not in peers.keys():
+            self.client.request_info_of_users(chat_message.from_jid)
+
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
         print(f'[+] {response.from_jid} is now {"" if response.is_typing else "not "}typing.')
 
@@ -136,6 +141,10 @@ class EchoBot(KikClientCallback):
 
     def on_peer_info_received(self, response: PeersInfoResponse):
         print(f"[+] Peer info: {str(response.users)}")
+        global peers
+        for user in response.users:
+            peers[user.jid] = user.username
+        print(peers)
 
     def on_group_status_received(self, response: chatting.IncomingGroupStatus):
         print(f"[+] Status message in {response.group_jid}: {response.status}")
