@@ -33,7 +33,11 @@ def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str
         yield calculate.calculate(message.body[len(wettest_math):].strip())
     elif message.body.lower().startswith(wettest_shuffle):
         global shuffle_word
-        shuffle_word = shuffle.candidate()
+        try:
+            shuffle_word = shuffle.candidate()
+        except Exception as e:
+            print("Exception shuffling... {e}")
+        assert isinstance(shuffle_word, str)
         yield f"😮‍💨☝️🎲 {shuffle(shuffle_word)}"
     elif message.body.lower().startswith("wettest"):
         yield ai.wettest_gpt_completion_of(message.body)
