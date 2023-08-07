@@ -3,3 +3,4 @@
 creds.yaml
 openai.key
 __pycache__/
+points.yaml
