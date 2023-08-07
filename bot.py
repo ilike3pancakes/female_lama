@@ -112,9 +112,10 @@ class EchoBot(KikClientCallback):
         print(f"[+] '{chat_message.from_jid}' from group ID {chat_message.group_jid} says: {chat_message.body}")
 
         global shuffle_word
+        global peers
+
         if shuffle_word and chat_message.body and chat_message.body.strip() == shuffle_word:
             shuffle_word = None
-            global peers
             display = peers.get(chat_message.group_jid, "User")
             self.client.send_chat_message(
                 chat_message.group_jid,
@@ -129,7 +130,6 @@ class EchoBot(KikClientCallback):
         for message in process_chat_message(chat_message):
             self.client.send_chat_message(chat_message.group_jid, message)
 
-        global peers
         if chat_message.from_jid not in peers.keys():
             self.client.request_info_of_users(chat_message.from_jid)
 
