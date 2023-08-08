@@ -118,7 +118,7 @@ class EchoBot(KikClientCallback):
             shuffle_word = None
             display = peers.get(chat_message.from_jid, "User")
             self.client.send_chat_message(
-                chat_message.from_jid,
+                chat_message.group_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
             )
         else:
