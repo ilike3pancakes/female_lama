@@ -25,7 +25,7 @@ from points import atomic_incr
 import shuffle
 from auth import auth
 
-shuffle_word: str | None = None
+shuffle_word = dict()
 peers = dict()
 
 
@@ -36,12 +36,10 @@ def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str
         yield calculate.calculate(message.body[len(wettest_math):].strip())
     elif message.body.lower().startswith(wettest_shuffle):
         global shuffle_word
-        try:
-            shuffle_word = shuffle.candidate()
-        except Exception as e:
-            print("Exception shuffling... {e}")
-        assert isinstance(shuffle_word, str)
-        shuffled = list(shuffle_word)
+        new_shuffle_word = shuffle.candidate()
+        shuffle_word[message.from_jid] = new_shuffle_word
+
+        shuffled = list(new_shuffle_word)
         random.shuffle(shuffled)
         yield f"😮‍💨☝️🎲 {''.join(shuffled)}"
     elif message.body.lower().startswith("wettest"):
@@ -81,26 +79,27 @@ class EchoBot(KikClientCallback):
 
     def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
         self.online_status = True
+        from_jid = chat_message.from_jid
 
-        print(f"[+] '{chat_message.from_jid}' says: {chat_message.body}")
+        print(f"[+] '{from_jid}' says: {chat_message.body}")
 
         global shuffle_word
-        if shuffle_word and chat_message.body and chat_message.body.strip() == shuffle_word:
-            shuffle_word = None
+        if (word := shuffle_word.get(from_jid)) and chat_message.body and chat_message.body.strip() == word:
+            shuffle_word[from_jid] = None
             global peers
-            display = peers.get(chat_message.from_jid, "User")
+            display = peers.get(from_jid, "User")
             self.client.send_chat_message(
-                chat_message.from_jid,
-                f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
+                from_jid,
+                f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(from_jid, display)} points"
             )
         else:
-            print(f"{shuffle_word} != {chat_message.body}")
+            print(f"{shuffle_word.get(from_jid)} != {chat_message.body}")
 
-        if not auth(chat_message.from_jid):
+        if not auth(from_jid):
             return
 
         for message in process_chat_message(chat_message):
-            self.client.send_chat_message(chat_message.from_jid, message)
+            self.client.send_chat_message(from_jid, message)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
         print(f"[+] Chat message with ID {response.message_id} is delivered.")
@@ -109,26 +108,28 @@ class EchoBot(KikClientCallback):
         print(f"[+] Human has read the message with ID {response.message_id}.")
 
     def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage):
-        print(f"[+] '{chat_message.from_jid}' from group ID {chat_message.group_jid} says: {chat_message.body}")
+        group_jid = chat_message.group_jid
+
+        print(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
 
         global shuffle_word
         global peers
 
-        if shuffle_word and chat_message.body and chat_message.body.strip() == shuffle_word:
-            shuffle_word = None
+        if (word := shuffle_word.get(group_jid)) and chat_message.body and chat_message.body.strip() == word:
+            shuffle_word[group_jid] = None
             display = peers.get(chat_message.from_jid, "User")
             self.client.send_chat_message(
-                chat_message.group_jid,
+                group_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
             )
         else:
-            print(f"{shuffle_word} != {chat_message.body}")
+            print(f"{shuffle_word.get(group_jid)} != {chat_message.body}")
 
         if not auth(chat_message.from_jid):
             return
 
         for message in process_chat_message(chat_message):
-            self.client.send_chat_message(chat_message.group_jid, message)
+            self.client.send_chat_message(group_jid, message)
 
         if chat_message.from_jid not in peers.keys():
             self.client.request_info_of_users(chat_message.from_jid)
