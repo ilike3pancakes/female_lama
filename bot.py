@@ -134,16 +134,16 @@ class EchoBot(KikClientCallback):
         else:
             print(f"{word} != {chat_message.body}")
 
+        if chat_message.from_jid not in peers.keys():
+            print(f"Requesting peer info for {chat_message.from_jid}")
+            self.client.request_info_of_users(chat_message.from_jid)
+            self.client.xiphias_get_users(chat_message.from_jid)
+
         if not auth(chat_message.from_jid):
             return
 
         for message in process_chat_message(chat_message, associated_jid=group_jid):
             self.client.send_chat_message(group_jid, message)
-
-        if chat_message.from_jid not in peers.keys():
-            print(f"Requesting peer info for {chat_message.from_jid}")
-            self.client.request_info_of_users(chat_message.from_jid)
-            self.client.xiphias_get_users(chat_message.from_jid)
 
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
         print(f'[+] {response.from_jid} is now {"" if response.is_typing else "not "}typing.')
