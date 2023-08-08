@@ -109,7 +109,8 @@ class EchoBot(KikClientCallback):
 
 
     def on_xiphias_get_users_response(self, response: Union[UsersResponse, UsersByAliasResponse]):
-        print(f"!! {response.users}")
+        for user in response.users:
+            print(f"!! {user.display_name} {user.username}")
 
     def on_message_read(self, response: chatting.IncomingMessageReadEvent):
         print(f"[+] Human has read the message with ID {response.message_id}.")
@@ -142,6 +143,7 @@ class EchoBot(KikClientCallback):
         if chat_message.from_jid not in peers.keys():
             print(f"Requesting peer info for {chat_message.from_jid}")
             self.client.request_info_of_users(chat_message.from_jid)
+            self.client.xiphias_get_users(chat_message.from_jid)
 
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
         print(f'[+] {response.from_jid} is now {"" if response.is_typing else "not "}typing.')
