@@ -29,7 +29,7 @@ shuffle_word = dict()
 peers = dict()
 
 
-def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str, None, None]:
+def process_chat_message(message: chatting.IncomingChatMessage, *, associated_jid: str) -> Generator[str, None, None]:
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
     if message.body.lower().startswith(wettest_math):
@@ -37,7 +37,7 @@ def process_chat_message(message: chatting.IncomingChatMessage) -> Generator[str
     elif message.body.lower().startswith(wettest_shuffle):
         global shuffle_word
         new_shuffle_word = shuffle.candidate()
-        shuffle_word[message.from_jid] = new_shuffle_word
+        shuffle_word[associated_jid] = new_shuffle_word
 
         shuffled = list(new_shuffle_word)
         random.shuffle(shuffled)
@@ -99,7 +99,7 @@ class EchoBot(KikClientCallback):
         if not auth(from_jid):
             return
 
-        for message in process_chat_message(chat_message):
+        for message in process_chat_message(chat_message, associated_jid=from_jid):
             self.client.send_chat_message(from_jid, message)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
@@ -130,7 +130,7 @@ class EchoBot(KikClientCallback):
         if not auth(chat_message.from_jid):
             return
 
-        for message in process_chat_message(chat_message):
+        for message in process_chat_message(chat_message, associated_jid=group_jid):
             self.client.send_chat_message(group_jid, message)
 
         if chat_message.from_jid not in peers.keys():
