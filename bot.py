@@ -116,10 +116,10 @@ class EchoBot(KikClientCallback):
 
         if shuffle_word and chat_message.body and chat_message.body.strip() == shuffle_word:
             shuffle_word = None
-            display = peers.get(chat_message.group_jid, "User")
+            display = peers.get(chat_message.from_jid, "User")
             self.client.send_chat_message(
-                chat_message.group_jid,
-                f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.group_jid, display)} points"
+                chat_message.from_jid,
+                f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
             )
         else:
             print(f"{shuffle_word} != {chat_message.body}")
