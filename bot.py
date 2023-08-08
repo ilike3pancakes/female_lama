@@ -8,16 +8,18 @@ import random
 import sys
 import time
 import traceback
-from typing import Generator
+from typing import Generator, Union
 import yaml
 
 import kik_unofficial.datatypes.xmpp.chatting as chatting  # type: ignore
 from kik_unofficial.client import KikClient  # type: ignore
 from kik_unofficial.callbacks import KikClientCallback  # type: ignore
 from kik_unofficial.datatypes.xmpp.errors import SignUpError, LoginError  # type: ignore
+from kik_unofficial.datatypes.peers import User  # type: ignore
 from kik_unofficial.datatypes.xmpp.roster import FetchRosterResponse, PeersInfoResponse  # type: ignore
 from kik_unofficial.datatypes.xmpp.sign_up import RegisterResponse, UsernameUniquenessResponse  # type: ignore
 from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedResponse  # type: ignore
+from kik_unofficial.datatypes.xmpp.xiphias import UsersResponse, UsersByAliasResponse  # type: ignore
 
 import ai
 import calculate
@@ -105,6 +107,10 @@ class EchoBot(KikClientCallback):
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
         print(f"[+] Chat message with ID {response.message_id} is delivered.")
 
+
+    def on_xiphias_get_users_response(self, response: Union[UsersResponse, UsersByAliasResponse]):
+        print(f"!! {response.users}")
+
     def on_message_read(self, response: chatting.IncomingMessageReadEvent):
         print(f"[+] Human has read the message with ID {response.message_id}.")
 
@@ -134,6 +140,7 @@ class EchoBot(KikClientCallback):
             self.client.send_chat_message(group_jid, message)
 
         if chat_message.from_jid not in peers.keys():
+            print(f"Requesting peer info for {chat_message.from_jid}")
             self.client.request_info_of_users(chat_message.from_jid)
 
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
@@ -144,6 +151,10 @@ class EchoBot(KikClientCallback):
 
     def on_roster_received(self, response: FetchRosterResponse):
         print("[+] Chat partners:\n" + '\n'.join([str(member) for member in response.peers]))
+
+        users = [peer.jid for peer in response.peers if isinstance(peer, User)]
+
+        self.client.xiphias_get_users(users)
 
     def on_friend_attribution(self, response: chatting.IncomingFriendAttribution):
         print(f"[+] Friend attribution request from {response.referrer_jid}")
