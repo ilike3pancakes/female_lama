@@ -84,7 +84,8 @@ class EchoBot(KikClientCallback):
         print(f"[+] '{from_jid}' says: {chat_message.body}")
 
         global shuffle_word
-        if (word := shuffle_word.get(from_jid)) and chat_message.body and chat_message.body.strip() == word:
+        word = shuffle_word.get(from_jid)
+        if word and chat_message.body and chat_message.body.strip() == word:
             shuffle_word[from_jid] = None
             global peers
             display = peers.get(from_jid, "User")
@@ -93,7 +94,7 @@ class EchoBot(KikClientCallback):
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(from_jid, display)} points"
             )
         else:
-            print(f"{shuffle_word.get(from_jid)} != {chat_message.body}")
+            print(f"{word} != {chat_message.body}")
 
         if not auth(from_jid):
             return
@@ -114,8 +115,9 @@ class EchoBot(KikClientCallback):
 
         global shuffle_word
         global peers
+        word = shuffle_word.get(group_jid)
 
-        if (word := shuffle_word.get(group_jid)) and chat_message.body and chat_message.body.strip() == word:
+        if word and chat_message.body and chat_message.body.strip() == word:
             shuffle_word[group_jid] = None
             display = peers.get(chat_message.from_jid, "User")
             self.client.send_chat_message(
@@ -123,7 +125,7 @@ class EchoBot(KikClientCallback):
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
             )
         else:
-            print(f"{shuffle_word.get(group_jid)} != {chat_message.body}")
+            print(f"{word} != {chat_message.body}")
 
         if not auth(chat_message.from_jid):
             return
