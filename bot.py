@@ -51,7 +51,8 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
 class EchoBot(KikClientCallback):
     def __init__(self, creds):
         self.creds = creds
-        self.my_jid = self.creds.get('node') + "@talk.kik.com"
+        node = self.creds.get('node')
+        self.my_jid = node + "@talk.kik.com" if node else None
         self.kik_authenticated = False
         self.online_status = False
         self.connect()
