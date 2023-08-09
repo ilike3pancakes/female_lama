@@ -115,7 +115,7 @@ class EchoBot(KikClientCallback):
     def on_message_read(self, response: chatting.IncomingMessageReadEvent):
         print(f"[+] Human has read the message with ID {response.message_id}.")
 
-    def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage):
+    def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage) -> None:
         group_jid = chat_message.group_jid
 
         print(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
@@ -133,6 +133,9 @@ class EchoBot(KikClientCallback):
             )
         else:
             print(f"{word} != {chat_message.body}")
+
+        if chat_message.body.strip().lower() == "frfrfr":
+            self.client.send_chat_message(group_jid, "frfrfrfr 😮‍💨☝️")
 
         if chat_message.from_jid not in peers.keys():
             print(f"Requesting peer info for {chat_message.from_jid}")
