@@ -24,6 +24,7 @@ from kik_unofficial.datatypes.xmpp.xiphias import UsersResponse, UsersByAliasRes
 import ai
 import calculate
 from points import atomic_incr
+from urban import urban
 import shuffle
 from auth import auth
 
@@ -34,6 +35,7 @@ peers = dict()
 def process_chat_message(message: chatting.IncomingChatMessage, *, associated_jid: str) -> Generator[str, None, None]:
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
+    wettest_urban = "wettest urban"
     if message.body.lower().startswith(wettest_math):
         yield calculate.calculate(message.body[len(wettest_math):].strip())
     elif message.body.lower().startswith(wettest_shuffle):
@@ -44,6 +46,8 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
         shuffled = list(new_shuffle_word)
         random.shuffle(shuffled)
         yield f"😮‍💨☝️🎲 {''.join(shuffled)}"
+    elif message.body.lower().startswith(wettest_urban):
+        yield f"😮‍💨☝️\n\n{urban(message.body)}"
     elif message.body.lower().startswith("wettest"):
         yield ai.wettest_gpt_completion_of(message.body)
 
