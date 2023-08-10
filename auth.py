@@ -17,6 +17,7 @@ admin_from_jid_prefixes = {
     "kggv6poplly7eqoc4tup3uaebxbydi3tbpe2s7ew67w3s4256tlq_",  # Khelle@The Morgue
     "xe64nqmzhcjlct2sux64gslxbhjiequmfdrnantyrhy3cz3ulv7q_",  # Adam@BGE
     "saagukw4hkjf32ap7q6yo6qyragkhutqzfdbt4tkbsc3f2ijkrbq_",  # ilike3pancakes@BGE
+    "3bmbut27mwog55bsvuoqegsovst6wtxj73xxap23u372av7jmapq_",  # Yunowho@Morgue
 }
 
 
