@@ -47,7 +47,7 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
         random.shuffle(shuffled)
         yield f"😮‍💨☝️🎲 {''.join(shuffled)}"
     elif message.body.lower().startswith(wettest_urban):
-        yield f"😮‍💨☝️\n\n{urban(message.body)}"
+        yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
     elif message.body.lower().startswith("wettest"):
         yield ai.wettest_gpt_completion_of(message.body)
 
