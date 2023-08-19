@@ -214,7 +214,7 @@ class Wettest(KikClientCallback):
         print(f"[-] Register error: {response.message}")
 
     def on_disconnected(self):
-        print(f"\n!! Disconnected")
+        logger.warning(f"\n---Disconnected---\n")
 
     def refresh(self) -> bool:
         try:
