@@ -131,7 +131,7 @@ User:
 """
 
 
-def wettest_gpt_completion_of(body: str, *, friendly: bool = True) -> str:
+def wettest_gpt_completion_of(body: str, *, friendly: bool = False) -> str:
     resp = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[

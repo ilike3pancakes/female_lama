@@ -21,6 +21,8 @@ admin_from_jid_prefixes = {
     "s3rmebr7hg2rfutfwlm6dqi43757gerl4elaafqysunlelz5mlkq_",  # Lyserga@Morgue
     "jta4edxe5pvlomo5w4kcs66u4ebp5w6bhudqzwrubjwtijar3pyq_",  # Cassidy@Morgue
     "tzuur2ypbupwescn2or5fkmanysn3g3z7bjxhemvpw6f3maichuq_",  # Ready@Morgue
+    "el34fwo2s4gkl7wa34ednxgw36z6v7cgt7y7j3qqzszhd5di5s4a_",  # Polly@Morgue
+    "mfcvv4xcmtu7wek45idwtrf5mnk4orm4d62dho4s5uxhzhuongnq_",  # Spotty@Blackgate Peni
 }
 
 

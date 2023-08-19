@@ -33,6 +33,7 @@ peers = dict()
 
 
 def process_chat_message(message: chatting.IncomingChatMessage, *, associated_jid: str) -> Generator[str, None, None]:
+    global peers
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
     wettest_urban = "wettest urban"
@@ -49,7 +50,9 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
     elif message.body.lower().startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
     elif message.body.lower().startswith("wettest"):
-        yield ai.wettest_gpt_completion_of(message.body)
+        username = peers.get(message.from_jid)
+        friendly = username and "Khelle" in username
+        yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
 
 
 class EchoBot(KikClientCallback):
