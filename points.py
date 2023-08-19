@@ -1,7 +1,8 @@
 
 from typing import List, Optional
-from dataclasses import dataclass, asdict, fields
-import yaml
+from dataclasses import dataclass, fields  # TODO I don't think I'm using fields correctly
+
+from persistence import PersistenceMixin
 
 @dataclass
 class UserPoints:
@@ -11,24 +12,17 @@ class UserPoints:
 
 
 @dataclass
-class Points:
+class Points(PersistenceMixin):
     users: List[UserPoints]
 
     def __post_init__(self):
         if self.users and isinstance(self.users[0], dict):
             self.users = [UserPoints(**fields) for fields in self.users]
 
-def _write(points: Points) -> None:
-    with open("points.yaml", "w") as f:
-        f.write(yaml.dump(asdict(points)))
 
-
-def _read() -> Points:
-    try:
-        with open("points.yaml") as f:
-            return Points(**yaml.load(f.read(), Loader=yaml.Loader))
-    except FileNotFoundError:
-        print("Creating new points.yaml")
+    @staticmethod
+    def default_ctor() -> "Points":
+        print("Creating empty points.yaml")
         return Points(users=[])
 
 
@@ -38,7 +32,7 @@ def atomic_incr(user_jid: str, displayname: Optional[str]) -> int:
 
     Data is persisted.
     """
-    points = _read()
+    points: Points = Points.read("points.yaml", default_ctor=Points.default_ctor)
 
     points_mapping = {user.jid: user.points for user in points.users}
     new_points = points_mapping.get(user_jid, 0) + 1
@@ -51,7 +45,7 @@ def atomic_incr(user_jid: str, displayname: Optional[str]) -> int:
     if not any(user.jid == user_jid for user in points.users):
         points.users.append(UserPoints(jid=user_jid, displayname=displayname, points=new_points))
 
-    _write(points)
+    points.write("points.yaml")
 
     return new_points
 

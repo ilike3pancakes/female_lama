@@ -27,13 +27,12 @@ from points import atomic_incr
 from urban import urban
 import shuffle
 from auth import auth
+from peers import Peers
 
 shuffle_word = dict()
-peers = dict()
 
 
 def process_chat_message(message: chatting.IncomingChatMessage, *, associated_jid: str) -> Generator[str, None, None]:
-    global peers
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
     wettest_urban = "wettest urban"
@@ -50,12 +49,12 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
     elif message.body.lower().startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
     elif message.body.lower().startswith("wettest"):
-        username = peers.get(message.from_jid)
+        username = Peers.get(message.from_jid)
         friendly = username and "Khelle" in username
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
 
 
-class EchoBot(KikClientCallback):
+class Wettest(KikClientCallback):
     def __init__(self, creds):
         self.creds = creds
         node = self.creds.get('node')
@@ -97,8 +96,7 @@ class EchoBot(KikClientCallback):
         word = shuffle_word.get(from_jid)
         if word and chat_message.body and chat_message.body.strip() == word:
             shuffle_word[from_jid] = None
-            global peers
-            display = peers.get(from_jid, "User")
+            display = Peers.get(from_jid) or "User"
             self.client.send_chat_message(
                 from_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(from_jid, display)} points"
@@ -129,12 +127,11 @@ class EchoBot(KikClientCallback):
         print(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
 
         global shuffle_word
-        global peers
         word = shuffle_word.get(group_jid)
 
         if word and chat_message.body and chat_message.body.strip() == word:
             shuffle_word[group_jid] = None
-            display = peers.get(chat_message.from_jid, "User")
+            display = Peers.get(chat_message.from_jid) or "User"
             self.client.send_chat_message(
                 group_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
@@ -145,7 +142,7 @@ class EchoBot(KikClientCallback):
         if chat_message.body.strip().lower() == "frfrfr":
             self.client.send_chat_message(group_jid, "frfrfrfr 😮‍💨☝️")
 
-        if chat_message.from_jid not in peers.keys():
+        if chat_message.from_jid not in Peers.jids():
             print(f"Requesting peer info for {chat_message.from_jid}")
             self.client.request_info_of_users(chat_message.from_jid)
             self.client.xiphias_get_users(chat_message.from_jid)
@@ -177,10 +174,13 @@ class EchoBot(KikClientCallback):
 
     def on_peer_info_received(self, response: PeersInfoResponse):
         print(f"[+] Peer info: {str(response.users)}")
-        global peers
+        peers: Peers = Peers.read("peers.yaml", default_ctor=Peers.default_ctor)
+
         for user in response.users:
-            peers[user.jid] = user.display_name  # username is often "Username unavailable"
+            peers.insert(user.jid, display_name=user.display_name)  # username is often "Username unavailable"
+
         print(peers)
+        peers.write("peers.yaml")
 
     def on_group_status_received(self, response: chatting.IncomingGroupStatus):
         print(f"[+] Status message in {response.group_jid}: {response.status}")
@@ -265,7 +265,7 @@ if __name__ == '__main__':
     logger.addHandler(stream_handler)
 
     # create the bot
-    bot = EchoBot(creds)
+    bot = Wettest(creds)
 
     while True:
         time.sleep(120)

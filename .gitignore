@@ -4,3 +4,5 @@ creds.yaml
 openai.key
 __pycache__/
 points.yaml
+peers.test.yaml
+peers.yaml
