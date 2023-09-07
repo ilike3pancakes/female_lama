@@ -249,13 +249,13 @@ char -> char lower char upper randbit if
 
 if __name__ == "__main__":
     trigger1 = create_trigger(sassy_spec)
-    assert trigger1.value, f"{trigger1.success=} {trigger1.value=}"
+    assert trigger1.value, f"{trigger1.success} {trigger1.value}"
 
     trigger2 = create_trigger(lmao_spec)
-    assert trigger2.value, f"{trigger2.success=} {trigger2.value=}"
+    assert trigger2.value, f"{trigger2.success} {trigger2.value}"
 
     trigger3 = create_trigger(mock_spec)
-    assert trigger3.value, f"{trigger3.success=} {trigger3.value=}"
+    assert trigger3.value, f"{trigger3.success} {trigger3.value}"
 
     triggers = [trigger1.value, trigger2.value, trigger3.value]
 

@@ -32,7 +32,7 @@ from trigger import create_trigger, Trigger, evaluate_all_triggers
 
 shuffle_word = dict()
 
-trigger: Optional[Trigger]
+trigger: Optional[Trigger] = None
 
 
 def process_chat_message(message: chatting.IncomingChatMessage, *, associated_jid: str) -> Generator[str, None, None]:
@@ -58,6 +58,7 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
         if result.success:
             yield "Aight ☝️"
             trigger = result.value
+            logger.info(f"Trigger created {trigger.description}\n{trigger.prefix}\n{trigger.operation}\n{trigger.logic}\n")
         else:
             yield "wtf of retarded code is that ☝️☝️☝️"
     elif message.body.lower().startswith("wettest"):
