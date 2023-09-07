@@ -8,7 +8,7 @@ import random
 import sys
 import time
 import traceback
-from typing import Generator, Union
+from typing import Generator, Union, Optional
 import yaml
 
 import kik_unofficial.datatypes.xmpp.chatting as chatting  # type: ignore
@@ -28,14 +28,18 @@ from urban import urban
 import shuffle
 from auth import auth
 from peers import Peers
+from trigger import create_trigger, Trigger, evaluate_all_triggers
 
 shuffle_word = dict()
+
+trigger: Optional[Trigger]
 
 
 def process_chat_message(message: chatting.IncomingChatMessage, *, associated_jid: str) -> Generator[str, None, None]:
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
     wettest_urban = "wettest urban"
+    wettest_trigger = "wettest trigger\n"
     if message.body.lower().startswith(wettest_math):
         yield calculate.calculate(message.body[len(wettest_math):].strip())
     elif message.body.lower().startswith(wettest_shuffle):
@@ -48,9 +52,17 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
         yield f"😮‍💨☝️🎲 {''.join(shuffled)}"
     elif message.body.lower().startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
+    elif message.body.lower().startswith(wettest_trigger):
+        global trigger
+        result = create_trigger(message.body[len(wettest_trigger):])
+        if result.success:
+            yield "Aight ☝️"
+            trigger = result.value
+        else:
+            yield "wtf of retarded code is that ☝️☝️☝️"
     elif message.body.lower().startswith("wettest"):
         username = Peers.get(message.from_jid)
-        friendly = username and "Khelle" in username
+        friendly = "Khelle" in username if username else False
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
 
 
@@ -103,6 +115,11 @@ class Wettest(KikClientCallback):
             )
         else:
             print(f"{word} != {chat_message.body}")
+
+        global trigger
+        if trigger:
+            for res in evaluate_all_triggers(chat_message, [trigger]):
+                self.client.send_chat_message(from_jid, res)
 
         if not auth(from_jid):
             return
