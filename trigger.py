@@ -97,6 +97,8 @@ import re
 import random
 from typing import Callable, List, Union, Generator, Optional
 
+logger = logging.getLogger()
+
 def tokenize(description: str) -> List[str]:
     return description.split()
 
@@ -172,8 +174,10 @@ class Trigger:
         return forth_logic
 
     def match(self, input_str: str) -> Optional[str]:
+        logger.info(f"Matching {input_str} against {self.prefix}")
         if not input_str.startswith(self.prefix):
             return None
+        logger.info("Input matched!")
 
         input_str = self.prefix.join(input_str.split(self.prefix)[1:]) if self.prefix else input_str
 
