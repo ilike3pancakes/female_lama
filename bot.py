@@ -60,7 +60,7 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
             trigger = result.value
             logger.info(f"Trigger created {trigger.description}\n{trigger.prefix}\n{trigger.operation}\n{trigger.logic}\n")
         else:
-            yield "wtf of retarded code is that ☝️☝️☝️"
+            yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
     elif message.body.lower().startswith("wettest"):
         username = Peers.get(message.from_jid)
         friendly = "Khelle" in username if username else False
@@ -156,6 +156,11 @@ class Wettest(KikClientCallback):
             )
         else:
             print(f"{word} != {chat_message.body}")
+
+        global trigger
+        if trigger:
+            for res in evaluate_all_triggers(chat_message.body, [trigger]):
+                self.client.send_chat_message(group_jid, res)
 
         if chat_message.body.strip().lower() == "frfrfr":
             self.client.send_chat_message(group_jid, "frfrfrfr 😮‍💨☝️")
