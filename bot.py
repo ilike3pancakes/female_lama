@@ -119,7 +119,7 @@ class Wettest(KikClientCallback):
 
         global trigger
         if trigger:
-            for res in evaluate_all_triggers(chat_message, [trigger]):
+            for res in evaluate_all_triggers(chat_message.body, [trigger]):
                 self.client.send_chat_message(from_jid, res)
 
         if not auth(from_jid):

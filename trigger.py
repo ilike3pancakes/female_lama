@@ -95,6 +95,7 @@ aight let's see that ass
 
 import re
 import random
+import logging
 from typing import Callable, List, Union, Generator, Optional
 
 logger = logging.getLogger()
