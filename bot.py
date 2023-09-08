@@ -91,13 +91,11 @@ class Wettest(KikClientCallback):
     def on_authenticated(self):
         print("Kik login successful!")
         self.kik_authenticated = True
-        print("Now I'm Authenticated, let's request roster")
         self.client.request_roster()
 
     def on_login_ended(self, response: LoginResponse):
-        print(f"Full name: {response.first_name} {response.last_name}")
         self.my_jid = response.kik_node + "@talk.kik.com"
-        print("Saved JID \"" + self.my_jid + "\" for refreshing!")
+        print(f"Saved JID {self.my_jid} for refreshing")
 
     def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
         self.online_status = True
