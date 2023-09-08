@@ -119,7 +119,7 @@ class Wettest(KikClientCallback):
         else:
             print(f"{word} != {chat_message.body}")
 
-        trigger_specs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=Peers.default_ctor)
+        trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=TriggerSpecs.default_ctor)
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == from_jid]
         matching_triggers = [create_trigger(spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
@@ -161,7 +161,7 @@ class Wettest(KikClientCallback):
         else:
             print(f"{word} != {chat_message.body}")
 
-        trigger_specs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=Peers.default_ctor)
+        trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=TriggerSpecs.default_ctor)
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == group_jid]
         matching_triggers = [create_trigger(spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
