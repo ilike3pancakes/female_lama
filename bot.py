@@ -56,13 +56,13 @@ def process_authenticated_chat_message(
         result = create_trigger(message.body[len(wettest_trigger):])
         if result.success:
             yield "Aight ☝️"
-            logger.info(
-                f"Trigger created {result.value.description}\n{result.value.prefix}\n{result.value.operation}\n"
-                f"{result.value.logic}\n"
-            )
+            logger.info(f"Trigger created {result.value.prefix}\n{result.value.operation}")
             trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=Peers.default_ctor)
+            logger.info("Got trigger specs")
             trigger_specs.insert(associated_jid, trigger=result.value)
+            logger.info("Inserted new trigger spec")
             trigger_specs.write("trigger_specs.yaml")
+            logger.info("Wrote updated trigger specs")
         else:
             yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
     elif message.body.lower().startswith("wettest"):
