@@ -126,14 +126,18 @@ class TriggerSpecs(PersistenceMixin):
         return TriggerSpecs(specs=[])
 
     def insert(self, associated_jid: str, *, trigger: "Trigger"):
+        logger.info("Inserting...")
         new_spec = TriggerSpec(associated_jid=associated_jid, trigger_spec=trigger.description, prefix=trigger.prefix)
         self.specs = [
             new_spec if spec.associated_jid == associated_jid and spec.prefix == trigger.prefix else spec
             for spec in self.specs
         ]
 
+        logger.info("Checking existing specs")
+
         if not any(spec.associated_jid == associated_jid and spec.prefix == trigger.prefix for spec in self.specs):
             self.specs.append(new_spec)
+        logger.info("Done inserting.")
 
 
 def tokenize(description: str) -> List[str]:
