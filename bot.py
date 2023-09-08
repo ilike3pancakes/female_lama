@@ -123,7 +123,7 @@ class Wettest(KikClientCallback):
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == from_jid]
         matching_triggers = [create_trigger(spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
-        for res in evaluate_all_triggers(chat_message.body, [matching_valid_triggers]):
+        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers):
             self.client.send_chat_message(from_jid, res)
 
         if not auth(from_jid):
@@ -165,7 +165,7 @@ class Wettest(KikClientCallback):
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == group_jid]
         matching_triggers = [create_trigger(spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
-        for res in evaluate_all_triggers(chat_message.body, [matching_valid_triggers]):
+        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers):
             self.client.send_chat_message(group_jid, res)
 
         if chat_message.body.strip().lower() == "frfrfr":
