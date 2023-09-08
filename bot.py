@@ -57,7 +57,9 @@ def process_authenticated_chat_message(
         if result.success:
             yield "Aight ☝️"
             logger.info(f"Trigger created {result.value.prefix}\n{result.value.operation}")
-            trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=Peers.default_ctor)
+            trigger_specs: TriggerSpecs = TriggerSpecs.read(
+                "trigger_specs.yaml", default_ctor=TriggerSpecs.default_ctor
+            )
             logger.info("Got trigger specs")
             trigger_specs.insert(associated_jid, trigger=result.value)
             logger.info("Inserted new trigger spec")
