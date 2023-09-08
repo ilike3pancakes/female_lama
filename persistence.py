@@ -8,7 +8,8 @@ import yaml
 class PersistenceMixin:
     def write(self, where: str) -> None:
         with open(where, "w") as f:
-            f.write(yaml.dump(asdict(self)))
+            # https://github.com/python/mypy/issues/14941
+            f.write(yaml.dump(asdict(self)))  # type: ignore
 
     @classmethod
     def read(cls, where: str, *, default_ctor: Callable[[], typing.Any]) -> typing.Any:

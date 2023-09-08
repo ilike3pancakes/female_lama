@@ -92,13 +92,49 @@ then...
 
 aight let's see that ass
 """
+from __future__ import annotations
 
+from dataclasses import dataclass
 import re
 import random
 import logging
 from typing import Callable, List, Union, Generator, Optional
 
+from persistence import PersistenceMixin
+
 logger = logging.getLogger()
+
+
+@dataclass
+class TriggerSpec:
+    associated_jid: str
+    trigger_spec: str
+    prefix: str
+
+
+@dataclass
+class TriggerSpecs(PersistenceMixin):
+    specs: List[TriggerSpec]
+
+    def __post_init__(self):
+        if self.specs and isinstance(self.specs[0], dict):
+            self.specs = [TriggerSpec(**fields) for fields in self.specs]
+
+    @staticmethod
+    def default_ctor() -> "TriggerSpecs":
+        print("Creating empty trigger_specs.yaml")
+        return TriggerSpecs(specs=[])
+
+    def insert(self, associated_jid: str, *, trigger: "Trigger"):
+        new_spec = TriggerSpec(associated_jid=associated_jid, trigger_spec=trigger.description, prefix=trigger.prefix)
+        self.specs = [
+            new_spec if spec.associated_jid == associated_jid and spec.prefix == trigger.prefix else spec
+            for spec in self.specs
+        ]
+
+        if not any(spec.associated_jid == associated_jid and spec.prefix == trigger.prefix for spec in self.specs):
+            self.specs.append(new_spec)
+
 
 def tokenize(description: str) -> List[str]:
     return description.split()
@@ -108,7 +144,7 @@ class Trigger:
         self.description = description
         self.prefix = description.split('\n')[0]
         self.operation: Optional[str] = None  # Could be "word", "char", "sentence"
-        self.logic: Optional[Callable[[List[str], str, bool], None]] = None  # The function to apply
+        self.logic: Optional[Callable[[List[str | bool | None], str, bool], None]] = None  # The function to apply
         self.parse_description(description)
 
     def parse_description(self, description: str):
@@ -132,7 +168,7 @@ class Trigger:
     def compile_logic(self, code: str) -> Callable:
         tokens = re.findall(r'".+?"|\S+', code)
 
-        def forth_logic(stack: List[str], word: str, terminal: bool):
+        def forth_logic(stack: List[str | bool | None], word: str, terminal: bool):
             for token in tokens:
                 if token == "if":
                     condition = stack.pop()
@@ -142,7 +178,7 @@ class Trigger:
                 elif token == "concat":
                     right = stack.pop()
                     left = stack.pop()
-                    stack.append(left + right)
+                    stack.append(str(left) + str(right))
                 elif token == "word":
                     stack.append(word)
                 elif token == "char":
@@ -155,15 +191,15 @@ class Trigger:
                 elif token == "contains":
                     needle = stack.pop()
                     haystack = stack.pop()
-                    stack.append(needle in haystack)
+                    stack.append(str(needle) in str(haystack))
                 elif token == "randbit":
                     stack.append(random.choice([True, False]))
                 elif token == "upper":
                     to_change = stack.pop()
-                    stack.append(to_change.upper())
+                    stack.append(str(to_change).upper())
                 elif token == "lower":
                     to_change = stack.pop()
-                    stack.append(to_change.lower())
+                    stack.append(str(to_change).lower())
                 elif token == "nothing":
                     stack.append(None)
                 elif len(token) > 1 and token[0] == '"' and token[-1] == '"':
@@ -189,26 +225,29 @@ class Trigger:
             return ''.join([self.transform_char(c, idx + 1 == len(input_str)) for idx, c in enumerate(input_str)])
         elif self.operation == "sentence":
             sentences = input_str.splitlines()
-            transformed_sentences = [self.transform_sentence(s, idx + 1 == len(sentences)) for idx, s in enumerate(sentences)]
+            transformed_sentences = [
+                self.transform_sentence(s, idx + 1 == len(sentences)) for idx, s in enumerate(sentences)
+            ]
             return '\n'.join([sentence for sentence in transformed_sentences if sentence])
+        return None
 
     def transform_word(self, word: str, terminal: bool) -> str:
-        stack = []
+        stack: list[str | bool | None] = []
         assert self.logic
         self.logic(stack, word, terminal)
-        return stack[-1]  # We assume the final result is at the top of the stack
+        return str(stack[-1])  # We assume the final result is at the top of the stack
 
     def transform_char(self, char: str, terminal: bool) -> str:
-        stack = []
+        stack: list[str | bool | None] = []
         assert self.logic
         self.logic(stack, char, terminal)
-        return stack[-1]
+        return str(stack[-1])
 
     def transform_sentence(self, sentence: str, terminal: bool) -> str:
-        stack = []
+        stack: list[str | bool | None] = []
         assert self.logic
         self.logic(stack, sentence, terminal)
-        return stack[-1]
+        return str(stack[-1])
 
 
 class Result:

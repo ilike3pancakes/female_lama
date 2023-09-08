@@ -28,14 +28,14 @@ from urban import urban
 import shuffle
 from auth import auth
 from peers import Peers
-from trigger import create_trigger, Trigger, evaluate_all_triggers
+from trigger import create_trigger, Trigger, evaluate_all_triggers, TriggerSpecs
 
 shuffle_word = dict()
 
-trigger: Optional[Trigger] = None
 
-
-def process_chat_message(message: chatting.IncomingChatMessage, *, associated_jid: str) -> Generator[str, None, None]:
+def process_authenticated_chat_message(
+        message: chatting.IncomingChatMessage, *, associated_jid: str
+) -> Generator[str, None, None]:
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
     wettest_urban = "wettest urban"
@@ -53,12 +53,16 @@ def process_chat_message(message: chatting.IncomingChatMessage, *, associated_ji
     elif message.body.lower().startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
     elif message.body.lower().startswith(wettest_trigger):
-        global trigger
         result = create_trigger(message.body[len(wettest_trigger):])
         if result.success:
             yield "Aight ☝️"
-            trigger = result.value
-            logger.info(f"Trigger created {trigger.description}\n{trigger.prefix}\n{trigger.operation}\n{trigger.logic}\n")
+            logger.info(
+                f"Trigger created {result.value.description}\n{result.value.prefix}\n{result.value.operation}\n"
+                f"{result.value.logic}\n"
+            )
+            trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=Peers.default_ctor)
+            trigger_specs.insert(associated_jid, trigger=result.value)
+            trigger_specs.write("trigger_specs.yaml")
         else:
             yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
     elif message.body.lower().startswith("wettest"):
@@ -115,15 +119,17 @@ class Wettest(KikClientCallback):
         else:
             print(f"{word} != {chat_message.body}")
 
-        global trigger
-        if trigger:
-            for res in evaluate_all_triggers(chat_message.body, [trigger]):
-                self.client.send_chat_message(from_jid, res)
+        trigger_specs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=Peers.default_ctor)
+        matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == from_jid]
+        matching_triggers = [create_trigger(spec) for spec in matching_trigger_specs]
+        matching_valid_triggers = [result.value for result in matching_triggers if result.success]
+        for res in evaluate_all_triggers(chat_message.body, [matching_valid_triggers]):
+            self.client.send_chat_message(from_jid, res)
 
         if not auth(from_jid):
             return
 
-        for message in process_chat_message(chat_message, associated_jid=from_jid):
+        for message in process_authenticated_chat_message(chat_message, associated_jid=from_jid):
             self.client.send_chat_message(from_jid, message)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
@@ -155,10 +161,12 @@ class Wettest(KikClientCallback):
         else:
             print(f"{word} != {chat_message.body}")
 
-        global trigger
-        if trigger:
-            for res in evaluate_all_triggers(chat_message.body, [trigger]):
-                self.client.send_chat_message(group_jid, res)
+        trigger_specs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=Peers.default_ctor)
+        matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == group_jid]
+        matching_triggers = [create_trigger(spec) for spec in matching_trigger_specs]
+        matching_valid_triggers = [result.value for result in matching_triggers if result.success]
+        for res in evaluate_all_triggers(chat_message.body, [matching_valid_triggers]):
+            self.client.send_chat_message(group_jid, res)
 
         if chat_message.body.strip().lower() == "frfrfr":
             self.client.send_chat_message(group_jid, "frfrfrfr 😮‍💨☝️")
@@ -171,7 +179,7 @@ class Wettest(KikClientCallback):
         if not auth(chat_message.from_jid):
             return
 
-        for message in process_chat_message(chat_message, associated_jid=group_jid):
+        for message in process_authenticated_chat_message(chat_message, associated_jid=group_jid):
             self.client.send_chat_message(group_jid, message)
 
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
