@@ -190,7 +190,6 @@ class Trigger:
                 elif token == "sentence":
                     stack.append(word)
                 elif token == "terminal":
-                    stack.pop()
                     stack.append(terminal)
                 elif token == "contains":
                     needle = stack.pop()
@@ -280,7 +279,7 @@ def evaluate_all_triggers(input_str: str, all_triggers: List[Trigger]) -> Genera
 
 sassy_spec = """
 sassy
-word -> word word " 👏" concat word terminal if
+word -> word word " 👏" concat terminal if
 """.strip()
 
 lmao_spec = """.
@@ -293,6 +292,11 @@ mock
 char -> char lower char upper randbit if
 """.strip()
 
+angry_spec = """
+angry
+char -> char upper "!!    😠" concat char upper terminal if
+""".strip()
+
 if __name__ == "__main__":
     trigger1 = create_trigger(sassy_spec)
     assert trigger1.value, f"{trigger1.success} {trigger1.value}"
@@ -303,7 +307,10 @@ if __name__ == "__main__":
     trigger3 = create_trigger(mock_spec)
     assert trigger3.value, f"{trigger3.success} {trigger3.value}"
 
-    triggers = [trigger1.value, trigger2.value, trigger3.value]
+    trigger4 = create_trigger(angry_spec)
+    assert trigger4.value, f"{trigger4.success} {trigger4.value}"
+
+    triggers = [trigger1.value, trigger2.value, trigger3.value, trigger4.value]
 
     for result in evaluate_all_triggers("sassy hello world foobar", triggers):
         print(result)
@@ -312,4 +319,6 @@ if __name__ == "__main__":
     for result in evaluate_all_triggers("mock hello world", triggers):
         print(result)
     for result in evaluate_all_triggers("an ignored input example", triggers):
+        print(result)
+    for result in evaluate_all_triggers("angry hello world", triggers):
         print(result)
