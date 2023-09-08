@@ -19,7 +19,10 @@ admin_from_jid_prefixes = {
     "tzuur2ypbupwescn2or5fkmanysn3g3z7bjxhemvpw6f3maichuq_",  # Ready@Morgue
     "el34fwo2s4gkl7wa34ednxgw36z6v7cgt7y7j3qqzszhd5di5s4a_",  # Polly@Morgue
     "mfcvv4xcmtu7wek45idwtrf5mnk4orm4d62dho4s5uxhzhuongnq_",  # Spotty@Blackgate Peni
-    "4j5xj3m7rqeufpqxscstv7rb2outxmtzsulnhspto53ofqotlata_",  # ilike3pancakes@30slounge
+    "5dakspl22ohponzu2fdycazjow3hrzmpffza3hhg6yabdi25uqsa_",  # Khelle@Hell
+    "ywa5jykdafzyfxgq2zzlqedvpfabciqm473eecmxzp4vy7ctsjga_",  # Cide@Hell
+    "lyd3kedas6qjice5x2esi6mrfyqqvc3fjqadxmbcsc26xq3rdysq_",  # ilike3pancakes@Hell
+    "poklg7x4wx3j3tr4zlvyrnajyxilz7xdhr45yo3ccirwjf7pqg6q_",  # David@Hell
 }
 
 
