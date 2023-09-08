@@ -224,34 +224,36 @@ class Trigger:
 
         if self.operation == "word":
             words = input_str.split()
-            return ' '.join([self.transform_word(word, idx + 1 == len(words)) for idx, word in enumerate(words)])
+            transformed_words = [self.transform_word(word, idx + 1 == len(words)) for idx, word in enumerate(words)]
+            return ' '.join([str(word) for word in transformed_words if word])
         elif self.operation == "char":
-            return ''.join([self.transform_char(c, idx + 1 == len(input_str)) for idx, c in enumerate(input_str)])
+            transformed_chars = [self.transform_char(c, idx + 1 == len(input_str)) for idx, c in enumerate(input_str)]
+            return ''.join([str(char) for char in transformed_chars if char])
         elif self.operation == "sentence":
             sentences = input_str.splitlines()
             transformed_sentences = [
                 self.transform_sentence(s, idx + 1 == len(sentences)) for idx, s in enumerate(sentences)
             ]
-            return '\n'.join([sentence for sentence in transformed_sentences if sentence])
+            return '\n'.join([str(sentence) for sentence in transformed_sentences if sentence])
         return None
 
-    def transform_word(self, word: str, terminal: bool) -> str:
+    def transform_word(self, word: str, terminal: bool) -> str | bool | None:
         stack: list[str | bool | None] = []
         assert self.logic
         self.logic(stack, word, terminal)
-        return str(stack[-1])  # We assume the final result is at the top of the stack
+        return stack[-1]  # We assume the final result is at the top of the stack
 
-    def transform_char(self, char: str, terminal: bool) -> str:
+    def transform_char(self, char: str, terminal: bool) -> str | bool | None:
         stack: list[str | bool | None] = []
         assert self.logic
         self.logic(stack, char, terminal)
-        return str(stack[-1])
+        return stack[-1]
 
-    def transform_sentence(self, sentence: str, terminal: bool) -> str:
+    def transform_sentence(self, sentence: str, terminal: bool) -> str | bool | None:
         stack: list[str | bool | None] = []
         assert self.logic
         self.logic(stack, sentence, terminal)
-        return str(stack[-1])
+        return stack[-1]
 
 
 class Result:
