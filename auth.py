@@ -23,6 +23,10 @@ admin_from_jid_prefixes = {
     "ywa5jykdafzyfxgq2zzlqedvpfabciqm473eecmxzp4vy7ctsjga_",  # Cide@Hell
     "lyd3kedas6qjice5x2esi6mrfyqqvc3fjqadxmbcsc26xq3rdysq_",  # ilike3pancakes@Hell
     "poklg7x4wx3j3tr4zlvyrnajyxilz7xdhr45yo3ccirwjf7pqg6q_",  # David@Hell
+    "w65qexc2tbqftj53syyaq6ejfd3u3fywxxef32sdyqu7c7ytwleq_",  # ilike3pqncakes@poem
+    "w3xf2uyxw7nliybn6y4w4boqhbusyup5ifjy6ahtfwmlqgt4wlfq_",  # Nobody@poem
+    "kk3go7fwr4niuydyckp6b54kqz62sbh7gm4tl4tyxpcvyczun6pq_",  # Sira@Morgue
+    "v32t7cqoj3syalzsajcg6szbah3i3p4nxdmnjo6y6nilenur7n3q_",  # Eric@BGE
 }
 
 
