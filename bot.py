@@ -89,6 +89,10 @@ def process_authenticated_chat_message(
             display = Peers.get(message.from_jid) or "User"
             yield f"You killed him 😮‍💨☝️☝️☝️ good job {display}..."
             set_dictionary([shuffle.candidate().lower()])
+        elif res == None:
+            pass
+        else:
+            logger.error(f"Unexpected hangman res {res}")
         yield(get_state())
 
 class Wettest(KikClientCallback):

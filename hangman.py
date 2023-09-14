@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from random import choice
-from typing import Literal, List
+from typing import List
 
 
 # Internal game state
@@ -90,7 +90,7 @@ def _initialize_game():
     _word_display = ['_'] * len(_current_word)
 
 
-def hangman(s: str) -> Literal["win", "loss", None]:
+def hangman(s: str) -> str | None:
     global _wrong_guesses, _guessed_chars, _word_display
     if not _word_list or not _current_word:
         raise ValueError("No dictionary set")
