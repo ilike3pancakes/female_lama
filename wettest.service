@@ -6,3 +6,6 @@ Wants=sshd.service
 ExecStart=/usr/bin/python3.7 bot.py -c creds.yaml
 RestartSec=5
 WorkingDirectory=/home/pi/Documents/female_lama/
+Restart=always
+RuntimeMaxSec=8hr
+RuntimeRandomizedExtraSec=1hr
