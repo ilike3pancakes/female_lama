@@ -72,11 +72,11 @@ def process_authenticated_chat_message(
         username = Peers.get(message.from_jid)
         friendly = "Khelle" in username if username else False
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
-    elif (
-        username := Peers.get(message.from_id)
-        and any(["Khelle" in username, "Blake" in username])
-        and len(message.body) == 1
-    ):
+    elif len(message.body) == 1:
+        username = Peers.get(message.from_jid)
+        if not any(["Khelle" in username, "Blake" in username]):
+            return
+
         if not get_word():
             set_dictionary([shuffle.candidate().lower()])
 
