@@ -146,7 +146,7 @@ def tokenize(description: str) -> List[str]:
 class Trigger:
     def __init__(self, description: str):
         self.description = description
-        self.prefix = description.split('\n')[0]
+        self.prefix = description.split('\n')[0].strip()
         self.operation: Optional[str] = None  # Could be "word", "char", "sentence"
         self.logic: Optional[Callable[[List[str | bool | None], str, bool], None]] = None  # The function to apply
         self.parse_description(description)
@@ -215,7 +215,7 @@ class Trigger:
 
     def match(self, input_str: str) -> Optional[str]:
         logger.info(f"Matching {input_str} against {self.prefix}")
-        if not input_str.startswith(self.prefix):
+        if not input_str.startswith(f"{self.prefix} "):
             return None
         logger.info("Input matched!")
 

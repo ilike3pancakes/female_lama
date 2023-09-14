@@ -27,6 +27,7 @@ admin_from_jid_prefixes = {
     "w3xf2uyxw7nliybn6y4w4boqhbusyup5ifjy6ahtfwmlqgt4wlfq_",  # Nobody@poem
     "kk3go7fwr4niuydyckp6b54kqz62sbh7gm4tl4tyxpcvyczun6pq_",  # Sira@Morgue
     "v32t7cqoj3syalzsajcg6szbah3i3p4nxdmnjo6y6nilenur7n3q_",  # Eric@BGE
+    "abp5ysnmxbrutb7sr7ibpowq74ejn2h4pgnqrrxab37ac2kcsi4a_",  # Blas@Hell
 }
 
 
