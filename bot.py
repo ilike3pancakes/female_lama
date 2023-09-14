@@ -29,7 +29,7 @@ import shuffle
 from auth import auth
 from peers import Peers
 from trigger import create_trigger, Trigger, evaluate_all_triggers, TriggerSpecs
-from hangman import set_dictionary, hangman, get_state, get_word
+from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 
 shuffle_word = dict()
 
@@ -87,7 +87,7 @@ def process_authenticated_chat_message(
             set_dictionary([shuffle.candidate().lower()])
         elif res == "loss":
             display = Peers.get(message.from_jid) or "User"
-            yield f"You killed him 😮‍💨☝️☝️☝️ good job {display}..."
+            yield f"{HANGMAN_STAGES[-1]}You killed him 😮‍💨☝️☝️☝️ good job {display}... Next time guess {get_word()} ☝️"
             set_dictionary([shuffle.candidate().lower()])
         elif res == None:
             pass

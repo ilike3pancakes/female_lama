@@ -23,7 +23,7 @@ HANGMAN_STAGES = [
     """,
     """
     ┌─────
-    │    O
+    │    O
     │
     │
     │
@@ -31,41 +31,41 @@ HANGMAN_STAGES = [
     """,
     """
     ┌─────
-    │    O
-    │    │
+    │    O
+    │    │
     │
     │
     └─────
     """,
     """
     ┌─────
-    │    O
-    │   ┌│
+    │    O
+    │   ┌│
     │
     │
     └─────
     """,
     """
     ┌─────
-    │    O
-    │   ┌│┐
+    │    O
+    │   ┌│┐
     │
     │
     └─────
     """,
     """
     ┌─────
-    │    O
-    │   ┌│┐
-    │   ┌┘
+    │    O
+    │   ┌│┐
+    │   ┌┘
     │
     └─────
     """,
     """
     ┌─────
-    │    O
-    │   ┌│┐
-    │   ┌┘┐
+    │    O
+    │   ┌│┐
+    │   ┌┘┐
     │
     └─────
     """
@@ -107,7 +107,7 @@ def hangman(s: str) -> str | None:
     else:
         _wrong_guesses += 1
 
-    if _wrong_guesses >= 7:
+    if _wrong_guesses >= 6:
         _initialize_game()
         return "loss"
 
@@ -118,8 +118,12 @@ def hangman(s: str) -> str | None:
     return None
 
 
+def _display_wrong_guesses() -> str:
+    return " ".join(sorted(list(set(_guessed_chars) - set(_current_word))))
+
+
 def get_state() -> str:
-    return f"{HANGMAN_STAGES[_wrong_guesses]}\n{' '.join(_word_display)}"
+    return f"{_display_wrong_guesses()}\n{HANGMAN_STAGES[_wrong_guesses]}\n{' '.join(_word_display)}"
 
 
 if __name__ == "__main__":
