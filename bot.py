@@ -29,6 +29,7 @@ import shuffle
 from auth import auth
 from peers import Peers
 from trigger import create_trigger, Trigger, evaluate_all_triggers, TriggerSpecs
+from hangman import set_dictionary, hangman, get_state, get_word
 
 shuffle_word = dict()
 
@@ -71,7 +72,24 @@ def process_authenticated_chat_message(
         username = Peers.get(message.from_jid)
         friendly = "Khelle" in username if username else False
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
+    elif (
+        username := Peers.get(message.from_id)
+        and any(["Khelle" in username, "Blake" in username])
+        and len(message.body) == 1
+    ):
+        if not get_word():
+            set_dictionary([shuffle.candidate().lower()])
 
+        res = hangman(message.body.lower())
+        if res == "win":
+            display = Peers.get(message.from_jid) or "User"
+            yield f"You did it {display} 😮‍💨\n\nYou have {atomic_incr(message.from_jid, display)} points"
+            set_dictionary([shuffle.candidate().lower()])
+        elif res == "loss":
+            display = Peers.get(message.from_jid) or "User"
+            yield f"You killed him 😮‍💨☝️☝️☝️ good job {display}..."
+            set_dictionary([shuffle.candidate().lower()])
+        yield(get_state())
 
 class Wettest(KikClientCallback):
     def __init__(self, creds):
@@ -107,7 +125,7 @@ class Wettest(KikClientCallback):
         self.online_status = True
         from_jid = chat_message.from_jid
 
-        print(f"[+] '{from_jid}' says: {chat_message.body}")
+        logger.info(f"[+] '{from_jid}' says: {chat_message.body}")
 
         global shuffle_word
         word = shuffle_word.get(from_jid)
@@ -119,7 +137,7 @@ class Wettest(KikClientCallback):
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(from_jid, display)} points"
             )
         else:
-            print(f"{word} != {chat_message.body}")
+            logger.info(f"{word} != {chat_message.body}")
 
         trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=TriggerSpecs.default_ctor)
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == from_jid]
