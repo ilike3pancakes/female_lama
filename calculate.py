@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Generator, Optional# , Protocol
-
+from math import atan
 
 class ForthOp(): # Protocol
     def apply(self, vals: list[ForthVal]) -> None:
@@ -15,6 +15,13 @@ class ForthAdd(ForthOp):
         assert a is not None
         assert b is not None
         vals.append(ForthVal(val=a + b))
+
+
+class ForthAtan(ForthOp):
+    def apply(self, vals: list[ForthVal]) -> None:
+        a = vals.pop().val
+        assert a is not None
+        vals.append(ForthVal(val=atan(a)))
 
 
 class ForthNeg(ForthOp):
@@ -72,6 +79,7 @@ def parse(token: str) -> ForthOp:
         "/": ForthDiv(),
         "*": ForthMult(),
         "-": ForthSub(),
+        "atan": ForthAtan(),
     }
 
     return ops.get(token, None) or ForthVal(val=float(token))
@@ -98,3 +106,4 @@ def calculate(input: str) -> str:
 
 if __name__ == "__main__":
     print(calculate("300 0 +"))
+    print(calculate("1 atan 4 *"))
