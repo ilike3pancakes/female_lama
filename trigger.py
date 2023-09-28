@@ -331,10 +331,10 @@ aww_spec = """.
 sentence -> "awwwwwwwwwwwwwww" nothing sentence "aww" startswith if
 """.strip()[1:]
 
-mash_spec = """
-mash
-sentence -> someone gothic " and " concat someone italic concat
-""".strip()
+mash_spec = """.
+
+sentence -> someone " and " concat someone concat nothing sentence "mash" startswith if
+""".strip()[1:]
 
 if __name__ == "__main__":
     trigger1 = create_trigger(sassy_spec)
