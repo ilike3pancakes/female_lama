@@ -223,6 +223,20 @@ class Trigger:
                     stack.append(str(to_change).lower())
                 elif token == "nothing":
                     stack.append(None)
+                elif token == "[]":
+                    stack.append([])
+                elif token == "++":
+                    head = stack.pop()
+                    tail = stack.pop()
+                    tail.append(head)
+                    stack.append(tail)
+                elif token == "shuffle":
+                    list_ = stack.pop()
+                    shuffle(list_)
+                    stack.push(list_)
+                elif token == "head":
+                    list_ = stack.pop()
+                    stack.push(list_[-1])
                 elif len(token) > 1 and token[0] == '"' and token[-1] == '"':
                     # Quoted string literals
                     stack.append(token[1:-1])
@@ -333,7 +347,7 @@ sentence -> "awwwwwwwwwwwwwww" nothing sentence "aww" startswith if
 
 mash_spec = """.
 
-sentence -> someone " and " concat someone concat nothing sentence "mash" startswith if
+sentence -> someone " and " concat someone concat " " concat [] "happy" ++ "sad" ++ shuffle head concat nothing sentence "mash" startswith if
 """.strip()[1:]
 
 if __name__ == "__main__":
