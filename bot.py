@@ -148,7 +148,7 @@ class Wettest(KikClientCallback):
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == from_jid]
         matching_triggers = [create_trigger(spec.trigger_spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
-        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers):
+        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, ["No one"]):
             self.client.send_chat_message(from_jid, res)
 
         if not auth(from_jid):
@@ -180,6 +180,8 @@ class Wettest(KikClientCallback):
         duration = datetime.datetime.utcnow() - t0
         logger.info(f"Updated peers.yaml in {duration}")
 
+        group_peers = [peer.display_name for peer in peers.entries if peer.group_jid == group_jid and peer.display_name]
+
         global shuffle_word
         word = shuffle_word.get(group_jid)
 
@@ -197,14 +199,14 @@ class Wettest(KikClientCallback):
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == group_jid]
         matching_triggers = [create_trigger(spec.trigger_spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
-        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers):
+        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, group_peers):
             self.client.send_chat_message(group_jid, res)
 
         if chat_message.body.strip().lower() == "frfrfr":
             self.client.send_chat_message(group_jid, "frfrfrfr 😮‍💨☝️")
 
         if chat_message.from_jid not in Peers.jids():
-            print(f"Requesting peer info for {chat_message.from_jid}")
+            logger.info(f"Requesting peer info for {chat_message.from_jid}")
             self.client.request_info_of_users(chat_message.from_jid)
             self.client.xiphias_get_users(chat_message.from_jid)
 
