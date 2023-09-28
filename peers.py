@@ -9,8 +9,8 @@ from persistence import PersistenceMixin
 @dataclass
 class Peer:
     jid: str
-    display_name: str | None
-    group_jid: str | None
+    display_name: str | None = None
+    group_jid: str | None = None
 
 
 @dataclass

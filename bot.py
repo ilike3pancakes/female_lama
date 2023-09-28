@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime
 import logging
 import random
 import sys
@@ -172,9 +173,12 @@ class Wettest(KikClientCallback):
 
         logger.info(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
 
+        t0 = datetime.datetime.utcnow()
         peers: Peers = Peers.read("peers.yaml", default_ctor=Peers.default_ctor)
         peers.insert(chat_message.from_jid, group_jid=group_jid)
         peers.write("peers.yaml")
+        duration = datetime.datetime.utcnow() - t0
+        logger.info(f"Updated peers.yaml in {duration}")
 
         global shuffle_word
         word = shuffle_word.get(group_jid)
