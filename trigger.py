@@ -104,6 +104,18 @@ from persistence import PersistenceMixin
 
 logger = logging.getLogger()
 
+dictionary_mappings = {
+    "standard": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "italic": "𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡",
+    "script": "𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵",
+    "cursive": "𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩",
+    "gothic": "𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ",
+    "gothicbold": "𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅",
+    "bb": "𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ",
+    "mono": "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",
+    "blocks": "🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉",
+}
+
 
 @dataclass
 class TriggerSpec:
@@ -148,7 +160,7 @@ class Trigger:
         self.description = description
         self.prefix = description.split('\n')[0].strip()
         self.operation: Optional[str] = None  # Could be "word", "char", "sentence"
-        self.logic: Optional[Callable[[List[str | bool | None], str, bool], None]] = None  # The function to apply
+        self.logic: Optional[Callable[[List[str | bool | None], str, bool, list[str]], None]] = None  # The function to apply
         self.parse_description(description)
 
     def parse_description(self, description: str):
@@ -172,7 +184,7 @@ class Trigger:
     def compile_logic(self, code: str) -> Callable:
         tokens = re.findall(r'".+?"|\S+', code)
 
-        def forth_logic(stack: List[str | bool | None], word: str, terminal: bool):
+        def forth_logic(stack: List[str | bool | None], word: str, terminal: bool, group_peers: list[str]):
             for token in tokens:
                 if token == "if":
                     condition = stack.pop()
@@ -201,6 +213,8 @@ class Trigger:
                     stack.append(str(needle) in str(haystack))
                 elif token == "randbit":
                     stack.append(random.choice([True, False]))
+                elif token == "someone":
+                    stack.append(random.choice(group_peers))
                 elif token == "upper":
                     to_change = stack.pop()
                     stack.append(str(to_change).upper())
@@ -212,12 +226,25 @@ class Trigger:
                 elif len(token) > 1 and token[0] == '"' and token[-1] == '"':
                     # Quoted string literals
                     stack.append(token[1:-1])
+                elif token in dictionary_mappings.keys():
+                    source = str(stack.pop())
+                    dictionary = dictionary_mappings[token]
+
+                    def index_of(source: str, char: str) -> int | None:
+                        try:
+                            return source.index(char)
+                        except ValueError:
+                            return None
+
+                    indices = [index_of(dictionary_mappings["standard"], ch) for ch in source]
+                    result = "".join([dictionary[index] if index else source[index] for index in indices])
+                    stack.append(result)
                 else:
                     stack.append(token)  # literals, etc.
 
         return forth_logic
 
-    def match(self, input_str: str) -> Optional[str]:
+    def match(self, input_str: str, group_peers: list[str]) -> Optional[str]:
         if not (input_str.startswith(f"{self.prefix} ") or self.prefix == ""):
             return None
 
@@ -225,35 +252,35 @@ class Trigger:
 
         if self.operation == "word":
             words = input_str.split()
-            transformed_words = [self.transform_word(word, idx + 1 == len(words)) for idx, word in enumerate(words)]
+            transformed_words = [self.transform_word(word, idx + 1 == len(words), group_peers) for idx, word in enumerate(words)]
             return ' '.join([str(word) for word in transformed_words if word])
         elif self.operation == "char":
-            transformed_chars = [self.transform_char(c, idx + 1 == len(input_str)) for idx, c in enumerate(input_str)]
+            transformed_chars = [self.transform_char(c, idx + 1 == len(input_str), group_peers) for idx, c in enumerate(input_str)]
             return ''.join([str(char) for char in transformed_chars if char])
         elif self.operation == "sentence":
             sentences = input_str.splitlines()
             transformed_sentences = [
-                self.transform_sentence(s, idx + 1 == len(sentences)) for idx, s in enumerate(sentences)
+                self.transform_sentence(s, idx + 1 == len(sentences), group_peers) for idx, s in enumerate(sentences)
             ]
             return '\n'.join([str(sentence) for sentence in transformed_sentences if sentence])
         return None
 
-    def transform_word(self, word: str, terminal: bool) -> str | bool | None:
+    def transform_word(self, word: str, terminal: bool, group_peers: list[str]) -> str | bool | None:
         stack: list[str | bool | None] = []
         assert self.logic
-        self.logic(stack, word, terminal)
+        self.logic(stack, word, terminal, group_peers)
         return stack[-1]  # We assume the final result is at the top of the stack
 
-    def transform_char(self, char: str, terminal: bool) -> str | bool | None:
+    def transform_char(self, char: str, terminal: bool, group_peers: list[str]) -> str | bool | None:
         stack: list[str | bool | None] = []
         assert self.logic
-        self.logic(stack, char, terminal)
+        self.logic(stack, char, terminal, group_peers)
         return stack[-1]
 
-    def transform_sentence(self, sentence: str, terminal: bool) -> str | bool | None:
+    def transform_sentence(self, sentence: str, terminal: bool, group_peers: list[str]) -> str | bool | None:
         stack: list[str | bool | None] = []
         assert self.logic
-        self.logic(stack, sentence, terminal)
+        self.logic(stack, sentence, terminal, group_peers)
         return stack[-1]
 
 
@@ -272,9 +299,9 @@ def create_trigger(description: str) -> Result:
         return Result(False, None)
 
 
-def evaluate_all_triggers(input_str: str, all_triggers: List[Trigger]) -> Generator[str, None, None]:
+def evaluate_all_triggers(input_str: str, all_triggers: list[Trigger], group_peers: list[str]) -> Generator[str, None, None]:
     for trigger in all_triggers:
-        result = trigger.match(input_str)
+        result = trigger.match(input_str, group_peers)
         if result:
             yield result
 
@@ -304,6 +331,11 @@ aww_spec = """.
 sentence -> "awwwwwwwwwwwwwww" nothing sentence "aww" startswith if
 """.strip()[1:]
 
+mash_spec = """
+mash
+sentence -> someone gothic " and " concat someone italic concat
+""".strip()
+
 if __name__ == "__main__":
     trigger1 = create_trigger(sassy_spec)
     assert trigger1.value, f"{trigger1.success} {trigger1.value}"
@@ -320,17 +352,24 @@ if __name__ == "__main__":
     trigger5 = create_trigger(aww_spec)
     assert trigger5.value, f"{trigger5.success} {trigger5.value}"
 
-    triggers = [trigger1.value, trigger2.value, trigger3.value, trigger4.value, trigger5.value]
+    trigger6 = create_trigger(mash_spec)
+    assert trigger6.value, f"{trigger6.success} {trigger6.value}"
 
-    for result in evaluate_all_triggers("sassy hello world foobar", triggers):
+    triggers = [trigger1.value, trigger2.value, trigger3.value, trigger4.value, trigger5.value, trigger6.value]
+
+    group_peers = ["foobar", "qwerty"]
+
+    for result in evaluate_all_triggers("sassy hello world foobar", triggers, group_peers):
         print(result)
-    for result in evaluate_all_triggers("haha lmao hello world foobar", triggers):
+    for result in evaluate_all_triggers("haha lmao hello world foobar", triggers, group_peers):
         print(result)
-    for result in evaluate_all_triggers("mock hello world", triggers):
+    for result in evaluate_all_triggers("mock hello world", triggers, group_peers):
         print(result)
-    for result in evaluate_all_triggers("an ignored input example", triggers):
+    for result in evaluate_all_triggers("an ignored input example", triggers, group_peers):
         print(result)
-    for result in evaluate_all_triggers("angry hello world", triggers):
+    for result in evaluate_all_triggers("angry hello world", triggers, group_peers):
         print(result)
-    for result in evaluate_all_triggers("aww ? aww", triggers):
+    for result in evaluate_all_triggers("aww ? aww", triggers, group_peers):
+        print(result)
+    for result in evaluate_all_triggers("mash", triggers, group_peers):
         print(result)
