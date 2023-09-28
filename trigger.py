@@ -232,11 +232,13 @@ class Trigger:
                     stack.append(tail)
                 elif token == "shuffle":
                     list_ = stack.pop()
-                    shuffle(list_)
-                    stack.push(list_)
+                    random.shuffle(list_)
+                    stack.append(list_)
                 elif token == "head":
                     list_ = stack.pop()
-                    stack.push(list_[-1])
+                    stack.append(list_[-1])
+                elif token == "break":
+                    stack.append("\n")
                 elif len(token) > 1 and token[0] == '"' and token[-1] == '"':
                     # Quoted string literals
                     stack.append(token[1:-1])
