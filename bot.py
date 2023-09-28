@@ -170,7 +170,11 @@ class Wettest(KikClientCallback):
     def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage) -> None:
         group_jid = chat_message.group_jid
 
-        print(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
+        logger.info(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
+
+        peers: Peers = Peers.read("peers.yaml", default_ctor=Peers.default_ctor)
+        peers.insert(chat_message.from_jid, group_jid=group_jid)
+        peers.write("peers.yaml")
 
         global shuffle_word
         word = shuffle_word.get(group_jid)
@@ -183,7 +187,7 @@ class Wettest(KikClientCallback):
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
             )
         else:
-            print(f"{word} != {chat_message.body}")
+            logger.info(f"{word} != {chat_message.body}")
 
         trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=TriggerSpecs.default_ctor)
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == group_jid]
@@ -226,13 +230,12 @@ class Wettest(KikClientCallback):
         print(f"[+] Image message was received from {image_message.from_jid}")
 
     def on_peer_info_received(self, response: PeersInfoResponse):
-        print(f"[+] Peer info: {str(response.users)}")
+        logger.info(f"[+] Peer info: {str(response.users)}")
         peers: Peers = Peers.read("peers.yaml", default_ctor=Peers.default_ctor)
 
         for user in response.users:
             peers.insert(user.jid, display_name=user.display_name)  # username is often "Username unavailable"
 
-        print(peers)
         peers.write("peers.yaml")
 
     def on_group_status_received(self, response: chatting.IncomingGroupStatus):

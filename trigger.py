@@ -218,10 +218,8 @@ class Trigger:
         return forth_logic
 
     def match(self, input_str: str) -> Optional[str]:
-        logger.info(f"Matching {input_str} against {self.prefix}")
         if not (input_str.startswith(f"{self.prefix} ") or self.prefix == ""):
             return None
-        logger.info("Input matched!")
 
         input_str = self.prefix.join(input_str.split(self.prefix)[1:]) if self.prefix else input_str
 
