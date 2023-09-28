@@ -191,6 +191,10 @@ class Trigger:
                     stack.append(word)
                 elif token == "terminal":
                     stack.append(terminal)
+                elif token == "startswith":
+                    needle = stack.pop()
+                    haystack = stack.pop()
+                    stack.append(str(haystack).startswith(str(needle)))
                 elif token == "contains":
                     needle = stack.pop()
                     haystack = stack.pop()
@@ -215,7 +219,7 @@ class Trigger:
 
     def match(self, input_str: str) -> Optional[str]:
         logger.info(f"Matching {input_str} against {self.prefix}")
-        if not input_str.startswith(f"{self.prefix} "):
+        if not (input_str.startswith(f"{self.prefix} ") or self.prefix == ""):
             return None
         logger.info("Input matched!")
 
@@ -297,6 +301,11 @@ angry
 char -> char upper "!!    😠" concat char upper terminal if
 """.strip()
 
+aww_spec = """.
+
+sentence -> "awwwwwwwwwwwwwww" nothing sentence "aww" startswith if
+""".strip()[1:]
+
 if __name__ == "__main__":
     trigger1 = create_trigger(sassy_spec)
     assert trigger1.value, f"{trigger1.success} {trigger1.value}"
@@ -310,7 +319,10 @@ if __name__ == "__main__":
     trigger4 = create_trigger(angry_spec)
     assert trigger4.value, f"{trigger4.success} {trigger4.value}"
 
-    triggers = [trigger1.value, trigger2.value, trigger3.value, trigger4.value]
+    trigger5 = create_trigger(aww_spec)
+    assert trigger5.value, f"{trigger5.success} {trigger5.value}"
+
+    triggers = [trigger1.value, trigger2.value, trigger3.value, trigger4.value, trigger5.value]
 
     for result in evaluate_all_triggers("sassy hello world foobar", triggers):
         print(result)
@@ -321,4 +333,6 @@ if __name__ == "__main__":
     for result in evaluate_all_triggers("an ignored input example", triggers):
         print(result)
     for result in evaluate_all_triggers("angry hello world", triggers):
+        print(result)
+    for result in evaluate_all_triggers("aww ? aww", triggers):
         print(result)
