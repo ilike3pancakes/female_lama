@@ -148,7 +148,7 @@ class Wettest(KikClientCallback):
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == from_jid]
         matching_triggers = [create_trigger(spec.trigger_spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
-        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, ["No one"]):
+        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, ["No one"], "Bruv"):
             self.client.send_chat_message(from_jid, res)
 
         if not auth(from_jid):
@@ -180,6 +180,8 @@ class Wettest(KikClientCallback):
         duration = datetime.datetime.utcnow() - t0
         logger.info(f"Updated peers.yaml in {duration}")
 
+        display = [peer.display_name or "User" for peer in peers.entries if peer.jid == chat_message.from_jid][0]
+
         group_peers = [peer.display_name for peer in peers.entries if peer.group_jid == group_jid and peer.display_name]
 
         global shuffle_word
@@ -187,7 +189,6 @@ class Wettest(KikClientCallback):
 
         if word and chat_message.body and chat_message.body.strip() == word:
             shuffle_word[group_jid] = None
-            display = Peers.get(chat_message.from_jid) or "User"
             self.client.send_chat_message(
                 group_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
@@ -199,7 +200,7 @@ class Wettest(KikClientCallback):
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == group_jid]
         matching_triggers = [create_trigger(spec.trigger_spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
-        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, group_peers):
+        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, group_peers, display):
             self.client.send_chat_message(group_jid, res)
 
         if chat_message.body.strip().lower() == "frfrfr":
