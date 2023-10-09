@@ -20,7 +20,6 @@ admin_from_jid_prefixes = {
     "el34fwo2s4gkl7wa34ednxgw36z6v7cgt7y7j3qqzszhd5di5s4a_",  # Polly@Morgue
     "mfcvv4xcmtu7wek45idwtrf5mnk4orm4d62dho4s5uxhzhuongnq_",  # Spotty@Blackgate Peni
     "5dakspl22ohponzu2fdycazjow3hrzmpffza3hhg6yabdi25uqsa_",  # Khelle@Hell
-    "ywa5jykdafzyfxgq2zzlqedvpfabciqm473eecmxzp4vy7ctsjga_",  # Cide@Hell
     "lyd3kedas6qjice5x2esi6mrfyqqvc3fjqadxmbcsc26xq3rdysq_",  # ilike3pancakes@Hell
     "poklg7x4wx3j3tr4zlvyrnajyxilz7xdhr45yo3ccirwjf7pqg6q_",  # David@Hell
     "w65qexc2tbqftj53syyaq6ejfd3u3fywxxef32sdyqu7c7ytwleq_",  # ilike3pqncakes@poem
@@ -28,7 +27,6 @@ admin_from_jid_prefixes = {
     "kk3go7fwr4niuydyckp6b54kqz62sbh7gm4tl4tyxpcvyczun6pq_",  # Sira@Morgue
     "v32t7cqoj3syalzsajcg6szbah3i3p4nxdmnjo6y6nilenur7n3q_",  # Eric@BGE
     "abp5ysnmxbrutb7sr7ibpowq74ejn2h4pgnqrrxab37ac2kcsi4a_",  # Blas@Hell
-    "7y2rogusfq6wuqwdfa32wuigx5dv3we56k3j25diweukdjs3dz7a_",  # ilike3pancakes@Cide
 }
 
 
