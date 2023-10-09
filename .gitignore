@@ -8,3 +8,4 @@ peers.test.yaml
 peers.yaml
 *.backup
 trigger_specs.yaml
+*.db
