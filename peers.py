@@ -1,60 +1,70 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, field
+import sqlite3
 from typing import List
 
-from persistence import PersistenceMixin
+from sqlite_persistence import SqlitePersistenceMixin
 
 
 @dataclass
-class Peer:
-    jid: str
-    display_name: str | None = None
-    group_jid: str | None = None
+class Peer(SqlitePersistenceMixin):
+    jid: str = field(metadata={'db_type': 'TEXT PRIMARY KEY', 'index': True, 'nullable': False})
+    display_name: str | None = field(default=None, metadata={'db_type': 'TEXT', 'index': True, 'nullable': True})
+    group_jid: str | None = field(default=None, metadata={'db_type': 'TEXT', 'index': True, 'nullable': True})
 
 
-@dataclass
-class Peers(PersistenceMixin):
-    entries: List[Peer]
-
-    def __post_init__(self):
-        if self.entries and isinstance(self.entries[0], dict):
-            self.entries = [Peer(**fields) for fields in self.entries]
-
+class Peers:
     @staticmethod
-    def default_ctor() -> "Peers":
-        print("Creating empty peers.yaml")
-        return Peers(entries=[])
+    def get(jid: str, *, conn: sqlite3.Connection) -> str | None:
+        """Gets the display name for the peer with the given jid."""
 
-    @staticmethod
-    def get(jid: str) -> str | None:
-        peers: Peers = Peers.read("peers.yaml", default_ctor=Peers.default_ctor)
-        matching_peers = [entry for entry in peers.entries if entry.jid == jid]
-        if matching_peers:
-            return matching_peers[0].display_name
+        maybe_peer: SqlitePersistenceMixin | None = Peer.load(conn, jid=jid)
+        if maybe_peer:
+            assert isinstance(maybe_peer, Peer)
+            return maybe_peer.display_name
 
         return None
 
     @staticmethod
-    def jids() -> list[str]:
-        peers: Peers = Peers.read("peers.yaml", default_ctor=Peers.default_ctor)
-        return [entry.jid for entry in peers.entries]
+    def get_all_in_group_jid(group_jid: str, *, conn: sqlite3.Connection) -> list[Peer]:
+        return Peer.load_all(conn=conn, group_jid=group_jid)  # type: ignore
 
-    def insert(self, jid: str, *, display_name: str | None = None, group_jid: str | None = None):
-        self.entries = [
-            Peer(jid=jid, display_name=display_name or user.display_name, group_jid=group_jid or user.group_jid)
-            if user.jid == jid else user
-            for user in self.entries
-        ]
+    @staticmethod
+    def all_jids(*, conn: sqlite3.Connection) -> list[str]:
+        """Gets all the recorded peer jids"""
+        peers: list[Peer] = Peer.load_all(conn)  # type: ignore
+        return [entry.jid for entry in peers]
 
-        if not any(user.jid == jid for user in self.entries):
-            self.entries.append(Peer(jid=jid, display_name=display_name, group_jid=group_jid))
+    @staticmethod
+    def insert(*, conn: sqlite3.Connection, jid: str, display_name: str | None = None, group_jid: str | None = None):
+        maybe_peer: SqlitePersistenceMixin | None = Peer.load(conn, jid=jid)
+        if maybe_peer:
+            assert isinstance(maybe_peer, Peer)
+            if not display_name:
+               display_name = maybe_peer.display_name
+
+            if not group_jid:
+                group_jid = maybe_peer.group_jid
+
+        Peer(jid=jid, display_name=display_name, group_jid=group_jid).save(conn)
 
 
 if __name__ == "__main__":
-    peers: Peers = Peers.read("peers.test.yaml", default_ctor=Peers.default_ctor)
-    peers.insert("abc123_", display_name="Test User")
-    peers.write("peers.test.yaml")
+    conn = sqlite3.connect("peers_test.db")
 
-    peers2: Peers = Peers.read("peers.test.yaml", default_ctor=Peers.default_ctor)
-    print(peers2)
+    Peers.insert(conn=conn, jid="abc123_", display_name="Test User")
+
+    peer = Peers.get("abc123_", conn=conn)
+    print(peer)
+
+    Peers.insert(conn=conn, jid="foobar_")
+
+    print(Peers.all_jids(conn=conn))
+
+    # Group test
+    Peers.insert(conn=conn, jid="a_", display_name="Test User", group_jid="q")
+    Peers.insert(conn=conn, jid="b_", display_name="Test User 2", group_jid="q")
+    Peers.insert(conn=conn, jid="c_", group_jid="q")
+
+    print(Peers.get_all_in_group_jid(group_jid="q", conn=conn))

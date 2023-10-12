@@ -6,6 +6,7 @@ import argparse
 import datetime
 import logging
 import random
+import sqlite3
 import sys
 import time
 import traceback
@@ -28,11 +29,13 @@ from points import atomic_incr
 from urban import urban
 import shuffle
 from auth import auth
-from peers import Peers
+from peers import Peer, Peers
 from trigger import create_trigger, Trigger, evaluate_all_triggers, TriggerSpecs
 from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 
 shuffle_word = dict()
+
+conn = sqlite3.connect("prod.db")
 
 
 def process_authenticated_chat_message(
@@ -70,11 +73,11 @@ def process_authenticated_chat_message(
         else:
             yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
     elif message.body.lower().startswith("wettest"):
-        username = Peers.get(message.from_jid)
+        username = Peers.get(message.from_jid, conn=conn)
         friendly = "Khelle" in username if username else False
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
     elif len(message.body) == 1:
-        username = Peers.get(message.from_jid)
+        username = Peers.get(message.from_jid, conn=conn)
         if not any(["Khelle" in username, "Blake" in username]):
             return
 
@@ -83,11 +86,11 @@ def process_authenticated_chat_message(
 
         res = hangman(message.body.lower())
         if res == "win":
-            display = Peers.get(message.from_jid) or "User"
+            display = Peers.get(message.from_jid, conn=conn) or "User"
             yield f"You did it {display} 😮‍💨\n\nYou have {atomic_incr(message.from_jid, display)} points"
             set_dictionary([shuffle.candidate().lower()])
         elif res == "loss":
-            display = Peers.get(message.from_jid) or "User"
+            display = Peers.get(message.from_jid, conn=conn) or "User"
             yield f"{HANGMAN_STAGES[-1]}You killed him 😮‍💨☝️☝️☝️ good job {display}... Next time guess {get_word()} ☝️"
             set_dictionary([shuffle.candidate().lower()])
         elif res == None:
@@ -136,7 +139,7 @@ class Wettest(KikClientCallback):
         word = shuffle_word.get(from_jid)
         if word and chat_message.body and chat_message.body.strip() == word:
             shuffle_word[from_jid] = None
-            display = Peers.get(from_jid) or "User"
+            display = Peers.get(from_jid, conn=conn) or "User"
             self.client.send_chat_message(
                 from_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(from_jid, display)} points"
@@ -174,15 +177,15 @@ class Wettest(KikClientCallback):
         logger.info(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
 
         t0 = datetime.datetime.utcnow()
-        peers: Peers = Peers.read("peers.yaml", default_ctor=Peers.default_ctor)
-        peers.insert(chat_message.from_jid, group_jid=group_jid)
-        peers.write("peers.yaml")
+
+        Peers.insert(conn=conn, jid=chat_message.from_jid, group_jid=group_jid)
         duration = datetime.datetime.utcnow() - t0
         logger.info(f"Updated peers.yaml in {duration}")
 
-        display = [peer.display_name or "User" for peer in peers.entries if peer.jid == chat_message.from_jid][0]
+        display: str = Peers.get(chat_message.from_jid, conn=conn) or "User"
 
-        group_peers = [peer.display_name for peer in peers.entries if peer.group_jid == group_jid and peer.display_name]
+        peers = Peers.get_all_in_group_jid(group_jid=group_jid, conn=conn)
+        group_peer_display_names = [peer.display_name for peer in peers if peer.display_name]
 
         global shuffle_word
         word = shuffle_word.get(group_jid)
@@ -200,13 +203,13 @@ class Wettest(KikClientCallback):
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == group_jid]
         matching_triggers = [create_trigger(spec.trigger_spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
-        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, group_peers, display):
+        for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, group_peer_display_names, display):
             self.client.send_chat_message(group_jid, res)
 
         if chat_message.body.strip().lower() == "frfrfr":
             self.client.send_chat_message(group_jid, "frfrfrfr 😮‍💨☝️")
 
-        if chat_message.from_jid not in Peers.jids():
+        if chat_message.from_jid not in Peers.all_jids(conn=conn):
             logger.info(f"Requesting peer info for {chat_message.from_jid}")
             self.client.request_info_of_users(chat_message.from_jid)
             self.client.xiphias_get_users(chat_message.from_jid)
@@ -237,13 +240,11 @@ class Wettest(KikClientCallback):
         print(f"[+] Image message was received from {image_message.from_jid}")
 
     def on_peer_info_received(self, response: PeersInfoResponse):
-        logger.info(f"[+] Peer info: {str(response.users)}")
-        peers: Peers = Peers.read("peers.yaml", default_ctor=Peers.default_ctor)
+        logger.info(f"[+] Peer info for {len(response.users)} users")
 
         for user in response.users:
-            peers.insert(user.jid, display_name=user.display_name)  # username is often "Username unavailable"
-
-        peers.write("peers.yaml")
+            # Note: username is often "Username unavailable"
+            Peers.insert(conn=conn, jid=user.jid, display_name=user.display_name)
 
     def on_group_status_received(self, response: chatting.IncomingGroupStatus):
         print(f"[+] Status message in {response.group_jid}: {response.status}")
