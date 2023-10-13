@@ -72,3 +72,12 @@ if __name__ == "__main__":
     Peers.insert(conn=conn, jid="c_", group_jid="q")
 
     print(Peers.get_all_in_group_jid(group_jid="q", conn=conn))
+
+    # Overwrite test
+    Peers.insert(conn=conn, jid="overwrite")
+    print(Peers.get("overwrite", conn=conn))
+    Peers.insert(conn=conn, jid="overwrite", display_name="Overwritten!")
+    print(Peers.get("overwrite", conn=conn))
+
+    conn2 = sqlite3.connect("prod.db")
+    # print(Peer.load_all(conn=conn2))
