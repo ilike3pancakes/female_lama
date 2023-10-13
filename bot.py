@@ -73,9 +73,11 @@ def process_authenticated_chat_message(
         else:
             yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
     elif message.body.lower().startswith("wettest"):
+        logger.info("AI requested")
         username = Peers.get(message.from_jid, conn=conn)
         friendly = "Khelle" in username if username else False
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
+        logger.info("AI request yielded")
     elif len(message.body) == 1:
         username = Peers.get(message.from_jid, conn=conn)
         if not any(["Khelle" in username, "Blake" in username]):
