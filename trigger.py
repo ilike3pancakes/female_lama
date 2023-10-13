@@ -214,7 +214,7 @@ class Trigger:
                 elif token == "randbit":
                     stack.append(random.choice([True, False]))
                 elif token == "someone":
-                    stack.append(random.choice(group_peers))
+                    stack.append(random.choice(group_peers or ["No one"]))
                 elif token == "self":
                     stack.append(self_)
                 elif token == "upper":
