@@ -35,7 +35,7 @@ from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 
 shuffle_word = dict()
 
-conn = sqlite3.connect("prod.db")
+conn = sqlite3.connect("prod.db", check_same_thread=False)
 
 
 def process_authenticated_chat_message(
@@ -74,11 +74,8 @@ def process_authenticated_chat_message(
             yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
     elif message.body.lower().startswith("wettest"):
         username = Peers.get(message.from_jid, conn=conn)
-        logger.info(username)
         friendly = "Khelle" in username if username else False
-        logger.info(friendly)
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
-        logger.info("AI request yielded")
     elif len(message.body) == 1:
         username = Peers.get(message.from_jid, conn=conn)
         if not any(["Khelle" in username, "Blake" in username]):
