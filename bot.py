@@ -209,7 +209,8 @@ class Wettest(KikClientCallback):
         if chat_message.body.strip().lower() == "frfrfr":
             self.client.send_chat_message(group_jid, "frfrfrfr 😮‍💨☝️")
 
-        if chat_message.from_jid not in [peer.jid for peer in Peers.get_all(conn=conn) if not peer.display_name]:
+        all_peers = Peers.get_all(conn=conn)
+        if chat_message.from_jid not in [peer.jid for peer in all_peers if peer.display_name]:
             logger.info(f"Requesting peer info for {chat_message.from_jid}")
             self.client.request_info_of_users(chat_message.from_jid)
             self.client.xiphias_get_users(chat_message.from_jid)
