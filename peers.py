@@ -31,6 +31,10 @@ class Peers:
         return Peer.load_all(conn=conn, group_jid=group_jid)  # type: ignore
 
     @staticmethod
+    def get_all(*, conn: sqlite3.Connection) -> list[Peer]:
+        return Peer.load_all(conn=conn)  # type: ignore
+
+    @staticmethod
     def all_jids(*, conn: sqlite3.Connection) -> list[str]:
         """Gets all the recorded peer jids"""
         peers: list[Peer] = Peer.load_all(conn)  # type: ignore
