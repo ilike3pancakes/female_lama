@@ -45,7 +45,7 @@ def reshuffle_word(associated_jid: str) -> str:
 
     shuffled = list(new_shuffle_word)
     random.shuffle(shuffled)
-    return shuffled
+    return ''.join(shuffled)
 
 
 def process_authenticated_chat_message(
@@ -59,7 +59,7 @@ def process_authenticated_chat_message(
         yield calculate.calculate(message.body[len(wettest_math):].strip())
     elif message.body.lower().startswith(wettest_shuffle):
         shuffled = reshuffle_word(associated_jid)
-        yield f"😮‍💨☝️🎲 {''.join(shuffled)}"
+        yield f"😮‍💨☝️🎲 {shuffled}"
     elif message.body.lower().startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
     elif message.body.lower().startswith(wettest_trigger):
