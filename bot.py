@@ -38,6 +38,16 @@ shuffle_word = dict()
 conn = sqlite3.connect("prod.db", check_same_thread=False)
 
 
+def reshuffle_word(associated_jid: str) -> str:
+    global shuffle_word
+    new_shuffle_word = shuffle.candidate()
+    shuffle_word[associated_jid] = new_shuffle_word
+
+    shuffled = list(new_shuffle_word)
+    random.shuffle(shuffled)
+    return shuffled
+
+
 def process_authenticated_chat_message(
         message: chatting.IncomingChatMessage, *, associated_jid: str
 ) -> Generator[str, None, None]:
@@ -48,12 +58,7 @@ def process_authenticated_chat_message(
     if message.body.lower().startswith(wettest_math):
         yield calculate.calculate(message.body[len(wettest_math):].strip())
     elif message.body.lower().startswith(wettest_shuffle):
-        global shuffle_word
-        new_shuffle_word = shuffle.candidate()
-        shuffle_word[associated_jid] = new_shuffle_word
-
-        shuffled = list(new_shuffle_word)
-        random.shuffle(shuffled)
+        shuffled = reshuffle_word(associated_jid)
         yield f"😮‍💨☝️🎲 {''.join(shuffled)}"
     elif message.body.lower().startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
@@ -144,6 +149,8 @@ class Wettest(KikClientCallback):
                 from_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(from_jid, display)} points"
             )
+            shuffled = reshuffle_word(from_jid)
+            self.client.send_chat_message(from_jid, f"What about {shuffled} ? 😮‍💨☝️")
         else:
             logger.info(f"{word} != {chat_message.body}")
 
@@ -196,6 +203,8 @@ class Wettest(KikClientCallback):
                 group_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
             )
+            shuffled = reshuffle_word(group_jid)
+            self.client.send_chat_message(group_jid, f"What about {shuffled} ? 😮‍💨☝️")
         elif word and chat_message.body and len(chat_message.body.strip().split(" ")) == 1:
             logger.info(f"Shuffle: {word} != {chat_message.body}")
 
