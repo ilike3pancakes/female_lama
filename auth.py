@@ -27,6 +27,11 @@ admin_from_jid_prefixes = {
     "kk3go7fwr4niuydyckp6b54kqz62sbh7gm4tl4tyxpcvyczun6pq_",  # Sira@Morgue
     "v32t7cqoj3syalzsajcg6szbah3i3p4nxdmnjo6y6nilenur7n3q_",  # Eric@BGE
     "abp5ysnmxbrutb7sr7ibpowq74ejn2h4pgnqrrxab37ac2kcsi4a_",  # Blas@Hell
+    "nz5rw5l5z5goepyvugvmfn7opjpeufmem75d2d4q4dej3l7s2uxa_",  # Blas#Morgue
+    "tgd2yc43fejlxduc4aortmiwruolj7rwlnfjk5prenqjdewddhiq_",  # ilike3pancakes@sinoclock
+    "hmvrgi7tpv5by6qqk252khwednv5zlwxd3kiyuzqrnjjcra67boq_",  # Kat@sinoclock
+    "23hshnspqh62tp4v36swiu66h62ifwxx63tk4nmtshpr234iytmq_",  # sizzle@sinoclock
+    "wwafkxej3w4hlobauwcyhopmeudw4lfoqr2eqeh7sril6yijouea_",  # wetter@sinoclock
 }
 
 

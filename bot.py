@@ -78,7 +78,7 @@ def process_authenticated_chat_message(
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
     elif len(message.body) == 1:
         username = Peers.get(message.from_jid, conn=conn)
-        if not any(["Khelle" in username, "Blake" in username]):
+        if not any(["Khelle" in username, "Blake" in username, "Blas" in username]):
             return
 
         if not get_word():
@@ -196,8 +196,8 @@ class Wettest(KikClientCallback):
                 group_jid,
                 f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
             )
-        else:
-            logger.info(f"{word} != {chat_message.body}")
+        elif word and chat_message.body and len(chat_message.body.strip().split(" ")) == 1:
+            logger.info(f"Shuffle: {word} != {chat_message.body}")
 
         trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=TriggerSpecs.default_ctor)
         matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == group_jid]
