@@ -83,7 +83,14 @@ def process_authenticated_chat_message(
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
     elif len(message.body) == 1:
         username = Peers.get(message.from_jid, conn=conn)
-        if not any(["Khelle" in username, "Blake" in username, "Blas" in username]):
+        if not any(
+            [
+                "Khelle" in username,
+                "Blake" in username,
+                "Blas" in username,
+                message.from_jid.startswith("hmvrgi7tpv5by6qqk252khwednv5zlwxd3kiyuzqrnjjcra67boq_"),  # Kat@Sinoclock
+            ]
+        ):
             return
 
         if not get_word():
