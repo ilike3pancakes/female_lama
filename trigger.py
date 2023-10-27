@@ -263,10 +263,19 @@ class Trigger:
         return forth_logic
 
     def match(self, input_str: str, group_peers: list[str], self_: str) -> Optional[str]:
-        if not (input_str.startswith(f"{self.prefix} ") or self.prefix == ""):
+        # Exact match: trigger the exact match
+        # Starts with: trigger all that start with it
+        # Empty prefix: match all input
+        exact_match = input_str == self.prefix
+        starts_with = input_str.startswith(f"{self.prefix} ")
+        empty_prefix = self.prefix == ""
+        if not (exact_match or starts_with or empty_prefix):
             return None
 
-        input_str = self.prefix.join(input_str.split(self.prefix)[1:]) if self.prefix else input_str
+        if starts_with:
+            input_str = self.prefix.join(input_str.split(self.prefix)[1:])
+        elif exact_match:
+            input_str = f"{input_str} "
 
         if self.operation == "word":
             words = input_str.split()
@@ -344,6 +353,11 @@ angry
 char -> char upper "!!    😠" concat char upper terminal if
 """.strip()
 
+woah_spec = """
+woah
+sentence -> "woah heh"
+""".strip()
+
 aww_spec = """.
 
 sentence -> "awwwwwwwwwwwwwww" nothing sentence "aww" startswith if
@@ -367,27 +381,38 @@ if __name__ == "__main__":
     trigger4 = create_trigger(angry_spec)
     assert trigger4.value, f"{trigger4.success} {trigger4.value}"
 
-    trigger5 = create_trigger(aww_spec)
+    trigger5 = create_trigger(woah_spec)
     assert trigger5.value, f"{trigger5.success} {trigger5.value}"
 
-    trigger6 = create_trigger(mash_spec)
+    trigger6 = create_trigger(aww_spec)
     assert trigger6.value, f"{trigger6.success} {trigger6.value}"
 
-    triggers = [trigger1.value, trigger2.value, trigger3.value, trigger4.value, trigger5.value, trigger6.value]
+    trigger7 = create_trigger(mash_spec)
+    assert trigger7.value, f"{trigger7.success} {trigger7.value}"
+
+    triggers = [
+        trigger1.value,
+        trigger2.value,
+        trigger3.value,
+        trigger4.value,
+        trigger5.value,
+        trigger6.value,
+        trigger7.value,
+    ]
 
     group_peers = ["foobar", "qwerty"]
 
-    for result in evaluate_all_triggers("sassy hello world foobar", triggers, group_peers, "B-lake"):
-        print(result)
-    for result in evaluate_all_triggers("haha lmao hello world foobar", triggers, group_peers, "B-lake"):
-        print(result)
-    for result in evaluate_all_triggers("mock hello world", triggers, group_peers, "B-lake"):
-        print(result)
-    for result in evaluate_all_triggers("an ignored input example", triggers, group_peers, "B-lake"):
-        print(result)
-    for result in evaluate_all_triggers("angry hello world", triggers, group_peers, "B-lake"):
-        print(result)
-    for result in evaluate_all_triggers("aww ? aww", triggers, group_peers, "B-lake"):
-        print(result)
-    for result in evaluate_all_triggers("mash", triggers, group_peers, "B-lake"):
-        print(result)
+    inputs = [
+        "sassy hello world foobar",
+        "haha lmao hello world foobar",
+        "mock hello world",
+        "an ignored input example",
+        "angry hello world",
+        "woah",
+        "aww ? aww",
+        "mash",
+    ]
+
+    for input_ in inputs:
+        for result in evaluate_all_triggers(input_, triggers, group_peers, "B-lake"):
+            print(result)
