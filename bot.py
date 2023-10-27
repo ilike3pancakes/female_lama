@@ -86,6 +86,7 @@ def process_authenticated_chat_message(
         if not any(
             [
                 "Khelle" in username,
+                "Rompe" in username,
                 "Blake" in username,
                 "Blas" in username,
             ]

@@ -32,6 +32,11 @@ admin_from_jid_prefixes = {
     "hmvrgi7tpv5by6qqk252khwednv5zlwxd3kiyuzqrnjjcra67boq_",  # Kat@sinoclock
     "23hshnspqh62tp4v36swiu66h62ifwxx63tk4nmtshpr234iytmq_",  # sizzle@sinoclock
     "wwafkxej3w4hlobauwcyhopmeudw4lfoqr2eqeh7sril6yijouea_",  # wetter@sinoclock
+    "sxftwyptvvvtdmdguy3nddpuldyvy2wscf3ug77p4r4zwjvap2la_",  # maze@coven
+    "6gbvbz4budh7yhwxsijjdklyka7klats3bhsh6lh4aspzfywi44q_",  # wetter@coven
+    "zkw2ncbf7euiilw4iguwwtkemrhrnpgrqynaa3y7afwhef7mtpoq_",  # ilike3pancakes@coven
+    "s4nhz3mnkieoofjr7kmui5wxaaxpongfaj7ezgp4pkdan66fh7aa_",  # Rompe@morgue
+    "kuox5wsrhbvqn4dkxwr6diizjb5uup26lo6exrzd735qxroh2sja_",  # Sizzle@coven
 }
 
 
