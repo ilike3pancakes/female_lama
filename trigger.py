@@ -203,6 +203,14 @@ class Trigger:
                     stack.append(word)
                 elif token == "terminal":
                     stack.append(terminal)
+                elif token == "fuckode":
+                    fuck = stack.pop()
+                    if len(fuck) > 2:
+                        bogus = '\u200b\u200f'
+                        fuckoded = f"{fuck[0]}{bogus}{fuck[1:]}"
+                        stack.append(fuckoded)
+                    else:
+                        stack.append(fuck)
                 elif token == "startswith":
                     needle = stack.pop()
                     haystack = stack.pop()
@@ -353,6 +361,11 @@ angry
 char -> char upper "!!    😠" concat char upper terminal if
 """.strip()
 
+fuckode_spec = """
+fuckode
+word -> word fuckode
+""".strip()
+
 woah_spec = """
 woah
 sentence -> "woah heh"
@@ -381,6 +394,9 @@ if __name__ == "__main__":
     trigger4 = create_trigger(angry_spec)
     assert trigger4.value, f"{trigger4.success} {trigger4.value}"
 
+    trigger_fuckode = create_trigger(fuckode_spec)
+    assert trigger_fuckode.value, f"{trigger_fuckode.success} {trigger_fuckode.value}"
+
     trigger5 = create_trigger(woah_spec)
     assert trigger5.value, f"{trigger5.success} {trigger5.value}"
 
@@ -395,6 +411,7 @@ if __name__ == "__main__":
         trigger2.value,
         trigger3.value,
         trigger4.value,
+        trigger_fuckode.value,
         trigger5.value,
         trigger6.value,
         trigger7.value,
@@ -408,6 +425,7 @@ if __name__ == "__main__":
         "mock hello world",
         "an ignored input example",
         "angry hello world",
+        "fuckode fuck",
         "woah",
         "aww ? aww",
         "mash",
