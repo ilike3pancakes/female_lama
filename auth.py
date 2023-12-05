@@ -14,29 +14,23 @@ admin_from_jid_prefixes = {
     "xe64nqmzhcjlct2sux64gslxbhjiequmfdrnantyrhy3cz3ulv7q_",  # Adam@BGE
     "saagukw4hkjf32ap7q6yo6qyragkhutqzfdbt4tkbsc3f2ijkrbq_",  # ilike3pancakes@BGE
     "3bmbut27mwog55bsvuoqegsovst6wtxj73xxap23u372av7jmapq_",  # Yunowho@Morgue
-    "s3rmebr7hg2rfutfwlm6dqi43757gerl4elaafqysunlelz5mlkq_",  # Lyserga@Morgue
     "jta4edxe5pvlomo5w4kcs66u4ebp5w6bhudqzwrubjwtijar3pyq_",  # Cassidy@Morgue
     "tzuur2ypbupwescn2or5fkmanysn3g3z7bjxhemvpw6f3maichuq_",  # Ready@Morgue
     "el34fwo2s4gkl7wa34ednxgw36z6v7cgt7y7j3qqzszhd5di5s4a_",  # Polly@Morgue
     "mfcvv4xcmtu7wek45idwtrf5mnk4orm4d62dho4s5uxhzhuongnq_",  # Spotty@Blackgate Peni
-    "5dakspl22ohponzu2fdycazjow3hrzmpffza3hhg6yabdi25uqsa_",  # Khelle@Hell
-    "lyd3kedas6qjice5x2esi6mrfyqqvc3fjqadxmbcsc26xq3rdysq_",  # ilike3pancakes@Hell
-    "poklg7x4wx3j3tr4zlvyrnajyxilz7xdhr45yo3ccirwjf7pqg6q_",  # David@Hell
     "w65qexc2tbqftj53syyaq6ejfd3u3fywxxef32sdyqu7c7ytwleq_",  # ilike3pqncakes@poem
     "w3xf2uyxw7nliybn6y4w4boqhbusyup5ifjy6ahtfwmlqgt4wlfq_",  # Nobody@poem
     "kk3go7fwr4niuydyckp6b54kqz62sbh7gm4tl4tyxpcvyczun6pq_",  # Sira@Morgue
     "v32t7cqoj3syalzsajcg6szbah3i3p4nxdmnjo6y6nilenur7n3q_",  # Eric@BGE
-    "abp5ysnmxbrutb7sr7ibpowq74ejn2h4pgnqrrxab37ac2kcsi4a_",  # Blas@Hell
     "nz5rw5l5z5goepyvugvmfn7opjpeufmem75d2d4q4dej3l7s2uxa_",  # Blas#Morgue
     "tgd2yc43fejlxduc4aortmiwruolj7rwlnfjk5prenqjdewddhiq_",  # ilike3pancakes@sinoclock
     "hmvrgi7tpv5by6qqk252khwednv5zlwxd3kiyuzqrnjjcra67boq_",  # Kat@sinoclock
-    "23hshnspqh62tp4v36swiu66h62ifwxx63tk4nmtshpr234iytmq_",  # sizzle@sinoclock
     "wwafkxej3w4hlobauwcyhopmeudw4lfoqr2eqeh7sril6yijouea_",  # wetter@sinoclock
-    "sxftwyptvvvtdmdguy3nddpuldyvy2wscf3ug77p4r4zwjvap2la_",  # maze@coven
     "6gbvbz4budh7yhwxsijjdklyka7klats3bhsh6lh4aspzfywi44q_",  # wetter@coven
     "zkw2ncbf7euiilw4iguwwtkemrhrnpgrqynaa3y7afwhef7mtpoq_",  # ilike3pancakes@coven
     "s4nhz3mnkieoofjr7kmui5wxaaxpongfaj7ezgp4pkdan66fh7aa_",  # Rompe@morgue
-    "kuox5wsrhbvqn4dkxwr6diizjb5uup26lo6exrzd735qxroh2sja_",  # Sizzle@coven
+    "2cgtgby2hjsyqf7ec3m6iwkgrn5mmqieaigporcaywhme6t5uncq_",  # Boney@WeeklyGroup
+    "xfouihqbab7z4gj22c4tnwczhs42k3jcxfefxv2gjhhlbcqmj56a_",  # ilike3pancakes@WeeklyGroup
 }
 
 
