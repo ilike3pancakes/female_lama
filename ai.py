@@ -1,4 +1,5 @@
 import openai
+import requests
 
 
 PROMPT = """
@@ -143,8 +144,24 @@ def wettest_gpt_completion_of(body: str, *, friendly: bool = False) -> str:
     return resp['choices'][0]['message']['content']
 
 
+def wettest_dalle_image_of(body: str) -> bytes:
+    resp = openai.Image.create(
+        model="dall-e-3",
+        prompt=body,
+        size="512x512",  # Max 1024x1024
+        quality="standard",
+        n=1
+    )
+
+    image_url = resp.data[0].url
+    image_response = requests.get(image_url)
+    # Download content from URL into a file:
+    return image_response.content
+
+
 if __name__ == "__main__":
-    print(wettest_gpt_completion_of("wettest do you have any animals?", friendly=True))
-    print(wettest_gpt_completion_of("wettest do you work out?", friendly=True))
-    print(wettest_gpt_completion_of("wettest do you game?", friendly=True))
-    print(wettest_gpt_completion_of("wettest do you pass the final test?", friendly=True))
+    print(wettest_dalle_image_of("a white siamese cat"))
+    # print(wettest_gpt_completion_of("wettest do you have any animals?", friendly=True))
+    # print(wettest_gpt_completion_of("wettest do you work out?", friendly=True))
+    # print(wettest_gpt_completion_of("wettest do you game?", friendly=True))
+    # print(wettest_gpt_completion_of("wettest do you pass the final test?", friendly=True))

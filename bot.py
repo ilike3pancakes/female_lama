@@ -37,6 +37,8 @@ shuffle_word = dict()
 
 conn = sqlite3.connect("prod.db", check_same_thread=False)
 
+A_Z = set("abcdefghijklmnopqrstuvwxyz".upper())
+
 
 def reshuffle_word(associated_jid: str) -> str:
     global shuffle_word
@@ -77,15 +79,20 @@ def process_authenticated_chat_message(
             logger.info("Wrote updated trigger specs")
         else:
             yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
+    elif message.body.lower() == "wettest hallucinate":
+        prompt = ai.wettest_gpt_completion_of("Wettest generate a dalle prompt to generate an image based on your personality")
+        yield ai.wettest_dalle_image_of(prompt)
+    elif message.body.lower().startswith("wettest hallucinate "):
+        yield "... aight, wait."
+        yield ai.wettest_dalle_image_of(message.body[len("wettest hallucinate "):])
     elif message.body.lower().startswith("wettest"):
         username = Peers.get(message.from_jid, conn=conn)
-        friendly = "Khelle" in username if username else False
+        friendly = "Rompe" in username if username else False
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
-    elif len(message.body) == 1:
+    elif len(message.body) == 1 and message.body() in A_Z:
         username = Peers.get(message.from_jid, conn=conn)
         if not any(
             [
-                "Khelle" in username,
                 "Rompe" in username,
                 "Blake" in username,
                 "Blas" in username,
@@ -172,7 +179,10 @@ class Wettest(KikClientCallback):
             return
 
         for message in process_authenticated_chat_message(chat_message, associated_jid=from_jid):
-            self.client.send_chat_message(from_jid, message)
+            if isinstance(message, str):
+                self.client.send_chat_message(from_jid, message)
+            elif isinstance(message, bytes):
+                self.client.send_chat_image(from_jid, message)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
         print(f"[+] Chat message with ID {response.message_id} is delivered.")
@@ -235,7 +245,10 @@ class Wettest(KikClientCallback):
             return
 
         for message in process_authenticated_chat_message(chat_message, associated_jid=group_jid):
-            self.client.send_chat_message(group_jid, message)
+            if isinstance(message, str):
+                self.client.send_chat_message(group_jid, message)
+            elif isinstance(message, bytes):
+                self.client.send_chat_image(group_jid, message)
 
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
         print(f'[+] {response.from_jid} is now {"" if response.is_typing else "not "}typing.')
