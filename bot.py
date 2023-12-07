@@ -80,6 +80,7 @@ def process_authenticated_chat_message(
         else:
             yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
     elif message.body.lower() == "wettest hallucinate":
+        yield "... aight, wait."
         prompt = ai.wettest_gpt_completion_of("Wettest generate a dalle prompt to generate an image based on your personality")
         yield ai.wettest_dalle_image_of(prompt)
     elif message.body.lower().startswith("wettest hallucinate "):

@@ -148,7 +148,7 @@ def wettest_dalle_image_of(body: str) -> bytes:
     resp = openai.Image.create(
         model="dall-e-3",
         prompt=body,
-        size="512x512",  # Max 1024x1024
+        size="1024x1024",
         quality="standard",
         n=1
     )
