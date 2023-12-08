@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 import requests
 
 
@@ -131,37 +131,59 @@ Answer the user's prompt in the style of Wettest, succinctly, remembering to use
 User:
 """
 
+client = OpenAI()
+
 
 def wettest_gpt_completion_of(body: str, *, friendly: bool = False) -> str:
-    resp = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a dramatic chat user."},
-            {"role": "user", "content": (PROMPT_FRIENDLY if friendly else PROMPT) + body},
-        ],
+    response = client.chat.completions.create(
+      model="gpt-4",
+      messages=[
+          {"role": "system", "content": "You are a dramatic chat user."},
+          {"role": "user", "content": (PROMPT_FRIENDLY if friendly else PROMPT) + body},
+      ]
     )
 
-    return resp['choices'][0]['message']['content']
+    return response.choices[0].message.content
+
+
+def _wettest_dalle_image_of(body: str) -> str:
+    response = client.images.generate(
+      model="dall-e-3",
+      prompt=body,
+      size="1024x1024",
+      quality="standard",
+      n=1,
+    )
+
+    return response.data[0].url
 
 
 def wettest_dalle_image_of(body: str) -> bytes:
-    resp = openai.Image.create(
-        model="dall-e-3",
-        prompt=body,
-        size="1024x1024",
-        quality="standard",
-        n=1
-    )
-
-    image_url = resp.data[0].url
+    image_url = _wettest_dalle_image_of(body)
     image_response = requests.get(image_url)
-    # Download content from URL into a file:
     return image_response.content
 
 
+def tts(body: str, save: bool = False) -> bytes:
+    response = client.audio.speech.create(
+      model="tts-1",
+      voice="alloy",
+      input=body
+    )
+
+    bytes_ = response.read()
+
+    if save:
+        with open("tmp.mp3", "wb") as f:
+            f.write(bytes_)
+
+    return response.read()
+
+
 if __name__ == "__main__":
-    print(wettest_dalle_image_of("a white siamese cat"))
+    # print(_wettest_dalle_image_of("the wettest planet"))
     # print(wettest_gpt_completion_of("wettest do you have any animals?", friendly=True))
     # print(wettest_gpt_completion_of("wettest do you work out?", friendly=True))
     # print(wettest_gpt_completion_of("wettest do you game?", friendly=True))
     # print(wettest_gpt_completion_of("wettest do you pass the final test?", friendly=True))
+    tts("Hello wettest", True)

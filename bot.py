@@ -13,6 +13,8 @@ import traceback
 from typing import Generator, Union, Optional
 import yaml
 
+from dataclasses import dataclass
+
 import kik_unofficial.datatypes.xmpp.chatting as chatting  # type: ignore
 from kik_unofficial.client import KikClient  # type: ignore
 from kik_unofficial.callbacks import KikClientCallback  # type: ignore
@@ -32,6 +34,7 @@ from auth import auth
 from peers import Peer, Peers
 from trigger import create_trigger, Trigger, evaluate_all_triggers, TriggerSpecs
 from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
+from xmpp import send_vn
 
 shuffle_word = dict()
 
@@ -50,9 +53,14 @@ def reshuffle_word(associated_jid: str) -> str:
     return ''.join(shuffled)
 
 
+@dataclass
+class VoiceNote:
+    mp3_bytes: bytes
+
+
 def process_authenticated_chat_message(
         message: chatting.IncomingChatMessage, *, associated_jid: str
-) -> Generator[str, None, None]:
+) -> Generator[str | bytes | VoiceNote, None, None]:
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
     wettest_urban = "wettest urban"
@@ -86,6 +94,11 @@ def process_authenticated_chat_message(
     elif message.body.lower().startswith("wettest hallucinate "):
         yield "... aight, wait."
         yield ai.wettest_dalle_image_of(message.body[len("wettest hallucinate "):])
+    elif message.body.lower().startswith("wettest vn "):
+        yield "I'll record"
+        completion = ai.wettest_gpt_completion_of(message.body[len("wettest vn "):])
+        mp3_bytes = ai.tts(completion)
+        yield VoiceNote(mp3_bytes=mp3_bytes)
     elif message.body.lower().startswith("wettest"):
         username = Peers.get(message.from_jid, conn=conn)
         friendly = "Rompe" in username if username else False
@@ -184,6 +197,8 @@ class Wettest(KikClientCallback):
                 self.client.send_chat_message(from_jid, message)
             elif isinstance(message, bytes):
                 self.client.send_chat_image(from_jid, message)
+            elif isinstance(message, VoiceNote):
+                send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
         print(f"[+] Chat message with ID {response.message_id} is delivered.")
