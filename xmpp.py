@@ -39,6 +39,7 @@ from kik_unofficial.utilities.cryptographic_utilities import CryptographicUtils
     #     f'<kik timestamp="{timestamp}" qos="true" push="true"/>'
     #     '<request xmlns="kik:message:receipt" d="true" r="true" />'
     #     f'<content id="{content_id}" v="2" app-id="com.kik.ext.gallery">'
+
     #     '<strings>'
     #     '<app-name>Gallery</app-name>'
     #     f'<allow-forward>{str(True).lower()}</allow-forward>'
@@ -50,7 +51,9 @@ from kik_unofficial.utilities.cryptographic_utilities import CryptographicUtils
     #     f'<preview>{encoded}</preview>'
     #     '<icon></icon>'
     #     '</images>'
+
     #     '<uris />'
+
     #     '</content>'
     #     '</message>'
     # )
@@ -77,6 +80,11 @@ def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> list[str
         '<disallow-save>false</disallow-save>'
         f'<file-url>data:audio/mpeg;base64,{encoded}</file-url>'
         '</strings>'
+
+        '<images>'
+        f'<preview>{encoded}</preview>'
+        '<icon></icon>'
+        '</images>'
 
         '<uris />'
 
