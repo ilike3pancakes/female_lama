@@ -30,6 +30,9 @@ admin_from_jid_prefixes = {
     "s4nhz3mnkieoofjr7kmui5wxaaxpongfaj7ezgp4pkdan66fh7aa_",  # Rompe@morgue
     "2cgtgby2hjsyqf7ec3m6iwkgrn5mmqieaigporcaywhme6t5uncq_",  # Boney@WeeklyGroup
     "xfouihqbab7z4gj22c4tnwczhs42k3jcxfefxv2gjhhlbcqmj56a_",  # ilike3pancakes@WeeklyGroup
+    "2zlonhc7h6p4fho5piltyoq2t56j6gkow74tzidugapsdeemumga_",  # Ginger@WeeklyGroup
+    "xf6kypcya5xorfnaa27ub5jejhb24wjzy7d5jgrpxfbu7xy6pw4q_",  # Croc@WeeklyGroup
+    "j5bbcengkilas7gi5rthcl5z3dg4wskzfqmqbjjoxqda4o4yajsa_",  # TexMex@WeeklyGroup
 }
 
 
