@@ -77,19 +77,23 @@ def process_authenticated_chat_message(
     elif message_body.startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
     elif message_body.startswith(wettest_tempban):
+        logger.info("Temp banning ... {message_body}")
         target_jid = message.body[len(wettest_tempban):].strip()
-        if " " in target_jid or not target_jid.endswith("@talk.kik.com"):
-            yield "☝️☝️ That won't work. Try it like...\n\nwettest tempban username_???@talk.kik.com"
-        else:
-            client.ban_member_from_group(associated_jid, target_jid)
-            client.unban_member_from_group(associated_jid, target_jid)
-            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+        try:
+            if " " in target_jid or not target_jid.endswith("@talk.kik.com"):
+                yield "☝️☝️ That won't work. Try it like...\n\nwettest tempban username_???@talk.kik.com"
+            else:
+                client.ban_member_from_group(associated_jid, target_jid)
+                client.unban_member_from_group(associated_jid, target_jid)
+                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+        except Exception as e:
+            logger.error(f"Error: {e}")
     elif message_body.startswith(wettest_trigger):
         result = create_trigger(message.body[len(wettest_trigger):])
         if result.success:
@@ -237,7 +241,11 @@ class Wettest(KikClientCallback):
 
         # Async processing hack.
         if len(async_queue):
-            async_queue.pop(0)()
+            logger.info(f"Async processing {len(async_queue)}")
+            try:
+                async_queue.pop(0)()
+            except Exception as e:
+                logger.error(f"Exception in async processing {e}")
 
         t0 = datetime.datetime.utcnow()
 
@@ -383,6 +391,8 @@ if __name__ == '__main__':
         help='Credentials file containing at least username, device_id and android_id.',
     )
     args = parser.parse_args()
+
+    sys.excepthook = lambda exctype, value, traceback: logger.error(f"Except hook -- {exctype}\n{value}\n{traceback}")
 
     with open(args.credentials) as f:
         creds = yaml.safe_load(f)
