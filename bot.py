@@ -10,7 +10,7 @@ import sqlite3
 import sys
 import time
 import traceback
-from typing import Generator, Union, Optional
+from typing import Generator, Union, Callable
 import yaml
 
 from dataclasses import dataclass
@@ -57,22 +57,40 @@ def reshuffle_word(associated_jid: str) -> str:
 class VoiceNote:
     mp3_bytes: bytes
 
+async_queue: list[Callable[[], None]] = []
+
 
 def process_authenticated_chat_message(
-        message: chatting.IncomingChatMessage, *, associated_jid: str
+        client: KikClient, message: chatting.IncomingChatMessage, *, associated_jid: str
 ) -> Generator[str | bytes | VoiceNote, None, None]:
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
     wettest_urban = "wettest urban"
     wettest_trigger = "wettest trigger\n"
-    if message.body.lower().startswith(wettest_math):
+    wettest_tempban = "wettest tempban"
+    message_body = message.body.lower()
+    if message_body.startswith(wettest_math):
         yield calculate.calculate(message.body[len(wettest_math):].strip())
-    elif message.body.lower().startswith(wettest_shuffle):
+    elif message_body.startswith(wettest_shuffle):
         shuffled = reshuffle_word(associated_jid)
         yield f"😮‍💨☝️🎲 {shuffled}"
-    elif message.body.lower().startswith(wettest_urban):
+    elif message_body.startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
-    elif message.body.lower().startswith(wettest_trigger):
+    elif message_body.startswith(wettest_tempban):
+        target_jid = message.body[len(wettest_tempban):].strip()
+        if " " in target_jid or not target_jid.endswith("@talk.kik.com"):
+            yield "☝️☝️ That won't work. Try it like...\n\nwettest tempban username_???@talk.kik.com"
+        else:
+            client.ban_member_from_group(associated_jid, target_jid)
+            client.unban_member_from_group(associated_jid, target_jid)
+            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+            async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+    elif message_body.startswith(wettest_trigger):
         result = create_trigger(message.body[len(wettest_trigger):])
         if result.success:
             yield "Aight ☝️"
@@ -87,19 +105,19 @@ def process_authenticated_chat_message(
             logger.info("Wrote updated trigger specs")
         else:
             yield "Yo wtf kind of retarded code is that ☝️☝️☝️"
-    elif message.body.lower() == "wettest hallucinate":
+    elif message_body == "wettest hallucinate":
         yield "... aight, wait."
         prompt = ai.wettest_gpt_completion_of("Wettest generate a dalle prompt to generate an image based on your personality")
         yield ai.wettest_dalle_image_of(prompt)
-    elif message.body.lower().startswith("wettest hallucinate "):
+    elif message_body.startswith("wettest hallucinate "):
         yield "... aight, wait."
         yield ai.wettest_dalle_image_of(message.body[len("wettest hallucinate "):])
-    elif message.body.lower().startswith("wettest vn "):
+    elif message_body.startswith("wettest vn "):
         yield "I'll record"
         completion = ai.wettest_gpt_completion_of(message.body[len("wettest vn "):])
         mp3_bytes = ai.tts(completion)
         yield VoiceNote(mp3_bytes=mp3_bytes)
-    elif message.body.lower().startswith("wettest"):
+    elif message_body.startswith("wettest"):
         username = Peers.get(message.from_jid, conn=conn)
         friendly = "Rompe" in username if username else False
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
@@ -117,7 +135,7 @@ def process_authenticated_chat_message(
         if not get_word():
             set_dictionary([shuffle.candidate().lower()])
 
-        res = hangman(message.body.lower())
+        res = hangman(message_body)
         if res == "win":
             display = Peers.get(message.from_jid, conn=conn) or "User"
             yield f"You did it {display} 😮‍💨\n\nYou have {atomic_incr(message.from_jid, display)} points"
@@ -130,7 +148,8 @@ def process_authenticated_chat_message(
             pass
         else:
             logger.error(f"Unexpected hangman res {res}")
-        yield(get_state())
+        yield get_state()
+
 
 class Wettest(KikClientCallback):
     def __init__(self, creds):
@@ -192,7 +211,7 @@ class Wettest(KikClientCallback):
         if not auth(from_jid):
             return
 
-        for message in process_authenticated_chat_message(chat_message, associated_jid=from_jid):
+        for message in process_authenticated_chat_message(self.client, chat_message, associated_jid=from_jid):
             if isinstance(message, str):
                 self.client.send_chat_message(from_jid, message)
             elif isinstance(message, bytes):
@@ -215,6 +234,10 @@ class Wettest(KikClientCallback):
         group_jid = chat_message.group_jid
 
         logger.info(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
+
+        # Async processing hack.
+        if len(async_queue):
+            async_queue.pop(0)()
 
         t0 = datetime.datetime.utcnow()
 
@@ -248,9 +271,6 @@ class Wettest(KikClientCallback):
         for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, group_peer_display_names, display):
             self.client.send_chat_message(group_jid, res)
 
-        if chat_message.body.strip().lower() == "frfrfr":
-            self.client.send_chat_message(group_jid, "frfrfrfr 😮‍💨☝️")
-
         all_peers = Peers.get_all(conn=conn)
         if chat_message.from_jid not in [peer.jid for peer in all_peers if peer.display_name]:
             logger.info(f"Requesting peer info for {chat_message.from_jid}")
@@ -260,7 +280,7 @@ class Wettest(KikClientCallback):
         if not auth(chat_message.from_jid):
             return
 
-        for message in process_authenticated_chat_message(chat_message, associated_jid=group_jid):
+        for message in process_authenticated_chat_message(self.client, chat_message, associated_jid=group_jid):
             if isinstance(message, str):
                 self.client.send_chat_message(group_jid, message)
             elif isinstance(message, bytes):
