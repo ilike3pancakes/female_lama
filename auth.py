@@ -33,6 +33,13 @@ admin_from_jid_prefixes = {
     "2zlonhc7h6p4fho5piltyoq2t56j6gkow74tzidugapsdeemumga_",  # Ginger@WeeklyGroup
     "xf6kypcya5xorfnaa27ub5jejhb24wjzy7d5jgrpxfbu7xy6pw4q_",  # Croc@WeeklyGroup
     "j5bbcengkilas7gi5rthcl5z3dg4wskzfqmqbjjoxqda4o4yajsa_",  # TexMex@WeeklyGroup
+    "tm4l3a6fczoevkfmqrl6k5v74lwrfmpzkiqtcawoxrlbpmmg556a_",  # sin@labyrinth
+    "5ecfkurhvuxs7cr6gcaqon7oj7htpczjwaxlqobtubrcfhusc43a_",  # ilike3pancakes@labyrinth
+    "ie7jqalznw7khfnb223x57ijf7euwzcuodgcy4sfvzgztwk4zo3q_",  # Cy@labyrinth
+    "vgpgbtp7xfspzw4n545atfrlxo7gpft3yc3rdia3lm6vkgavu2ya_",  # Rusto@labyrinth
+    "5hbwwosipuzzpxkp3wsgk24cpcwfck3qg7ounznl4vmzvlgjbwoa_",  # maze@coven
+    "_51n__", # sin
+    "xfch5jvr65adjkbcm3hddk2fv7xfsnpiix5d3kp7q66qbgjohmha_",  # diablo@morgue
 }
 
 
