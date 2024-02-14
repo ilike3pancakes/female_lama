@@ -87,11 +87,6 @@ def process_authenticated_chat_message(
                 client.unban_member_from_group(associated_jid, target_jid)
                 async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
                 async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
         except Exception as e:
             logger.error(f"Error: {e}")
     elif message_body.startswith(wettest_trigger):
