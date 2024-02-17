@@ -60,6 +60,30 @@ class VoiceNote:
 async_queue: list[Callable[[], None]] = []
 
 
+def maybe_tempban(message: chatting.IncomingChatMessage) -> bool:
+    message_body = message.body.lower()
+    wettest_tempban = "wettest tempban"
+    if message_body.startswith(wettest_tempban):
+
+        return True
+
+    return False
+
+def process_tempban(client: KikClient, message: chatting.IncomingChatMessage, associated_jid: str) -> Generator[str, None, None]:
+    wettest_tempban = "wettest tempban"
+    logger.info("Temp banning ... {message_body}")
+    target_jid = message.body[len(wettest_tempban):].strip()
+    try:
+        if " " in target_jid or not target_jid.endswith("@talk.kik.com"):
+            yield "☝️☝️ That won't work. Try it like...\n\nwettest tempban username_???@talk.kik.com"
+        else:
+            client.ban_member_from_group(associated_jid, target_jid)
+            client.unban_member_from_group(associated_jid, target_jid)
+            # async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
+    except Exception as e:
+        logger.error(f"Error: {e}")
+
+
 def process_authenticated_chat_message(
         client: KikClient, message: chatting.IncomingChatMessage, *, associated_jid: str
 ) -> Generator[str | bytes | VoiceNote, None, None]:
@@ -67,7 +91,6 @@ def process_authenticated_chat_message(
     wettest_shuffle = "wettest shuffle"
     wettest_urban = "wettest urban"
     wettest_trigger = "wettest trigger\n"
-    wettest_tempban = "wettest tempban"
     message_body = message.body.lower()
     if message_body.startswith(wettest_math):
         yield calculate.calculate(message.body[len(wettest_math):].strip())
@@ -76,19 +99,9 @@ def process_authenticated_chat_message(
         yield f"😮‍💨☝️🎲 {shuffled}"
     elif message_body.startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
-    elif message_body.startswith(wettest_tempban):
-        logger.info("Temp banning ... {message_body}")
-        target_jid = message.body[len(wettest_tempban):].strip()
-        try:
-            if " " in target_jid or not target_jid.endswith("@talk.kik.com"):
-                yield "☝️☝️ That won't work. Try it like...\n\nwettest tempban username_???@talk.kik.com"
-            else:
-                client.ban_member_from_group(associated_jid, target_jid)
-                client.unban_member_from_group(associated_jid, target_jid)
-                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-                async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
-        except Exception as e:
-            logger.error(f"Error: {e}")
+    elif maybe_tempban(message_body):
+        for resp in process_tempban(client, message, associated_jid):
+            yield resp
     elif message_body.startswith(wettest_trigger):
         result = create_trigger(message.body[len(wettest_trigger):])
         if result.success:
@@ -377,6 +390,66 @@ class Wettest(KikClientCallback):
             return False
 
 
+class WettestSlave(KikClientCallback):
+    def __init__(self, creds):
+        self.creds = creds
+        node = self.creds.get('node')
+        self.my_jid = node + "@talk.kik.com" if node else None
+        self.kik_authenticated = False
+        self.online_status = False
+        self.connect()
+
+    def connect(self):
+        device_id = self.creds['device_id']
+        android_id = self.creds['android_id']
+        username = self.creds['username']
+        node = self.creds.get('node')
+        password = self.creds.get('password')
+        if not password:
+            password = input('Password: ')
+            self.creds['password'] = password
+
+        self.client = KikClient(self, username, password, node, device_id=device_id, android_id=android_id)
+
+    def on_authenticated(self):
+        print("Slave kik login successful!")
+        self.kik_authenticated = True
+        self.client.request_roster()
+
+    def on_login_ended(self, response: LoginResponse):
+        self.my_jid = response.kik_node + "@talk.kik.com"
+        print(f"Slave saved JID {self.my_jid} for refreshing")
+
+    def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
+        self.online_status = True
+        from_jid = chat_message.from_jid
+
+        if not auth(from_jid):
+            return
+
+        self.client.send_chat_image(from_jid, "Acknowledged.")
+
+    def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage) -> None:
+        if not auth(chat_message.from_jid):
+            return
+
+        if maybe_tempban(chat_message.body):
+            time.sleep(0.5)
+            for resp in process_tempban(self.client, chat_message, chat_message.group_jid):
+                self.client.send_chat_message(chat_message.group_jid, resp)
+
+    def on_connection_failed(self, response: ConnectionFailedResponse):
+        print("Slave connection failed!")
+        self.kik_authenticated = False
+
+    def on_login_error(self, login_error: LoginError):
+        print("Slave kik login failed!")
+        self.kik_authenticated = False
+
+    def on_disconnected(self):
+        logger.warning(f"\n---Slave disconnected---\n")
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -398,6 +471,9 @@ if __name__ == '__main__':
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setFormatter(logging.Formatter(KikClient.log_format()))
     logger.addHandler(stream_handler)
+
+    # create slave bots
+    slave_bots = [WettestSlave(slave_creds) for slave_creds in creds.get("slaves") if "slaves" in creds.keys()]
 
     # create the bot
     bot = Wettest(creds)
