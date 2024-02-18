@@ -70,7 +70,7 @@ def maybe_tempban(message: chatting.IncomingChatMessage) -> bool:
 
 def process_tempban(client: KikClient, message: chatting.IncomingChatMessage, associated_jid: str) -> Generator[str, None, None]:
     wettest_tempban = "wettest tempban"
-    logger.info("Temp banning ... {message_body}")
+    logger.info(f"Temp banning ... {message.body}")
     target_jid = message.body[len(wettest_tempban):].strip()
     try:
         if " " in target_jid or not target_jid.endswith("@talk.kik.com"):
