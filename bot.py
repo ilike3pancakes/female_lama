@@ -64,7 +64,6 @@ def maybe_tempban(message: chatting.IncomingChatMessage) -> bool:
     message_body = message.body.lower()
     wettest_tempban = "wettest tempban"
     if message_body.startswith(wettest_tempban):
-
         return True
 
     return False
@@ -99,7 +98,7 @@ def process_authenticated_chat_message(
         yield f"😮‍💨☝️🎲 {shuffled}"
     elif message_body.startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
-    elif maybe_tempban(message_body):
+    elif maybe_tempban(message):
         for resp in process_tempban(client, message, associated_jid):
             yield resp
     elif message_body.startswith(wettest_trigger):
@@ -427,13 +426,13 @@ class WettestSlave(KikClientCallback):
         if not auth(from_jid):
             return
 
-        self.client.send_chat_image(from_jid, "Acknowledged.")
+        self.client.send_chat_message(from_jid, "Acknowledged.")
 
     def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage) -> None:
         if not auth(chat_message.from_jid):
             return
 
-        if maybe_tempban(chat_message.body):
+        if maybe_tempban(chat_message):
             time.sleep(0.5)
             for resp in process_tempban(self.client, chat_message, chat_message.group_jid):
                 self.client.send_chat_message(chat_message.group_jid, resp)
