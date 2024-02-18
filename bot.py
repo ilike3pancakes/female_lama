@@ -426,6 +426,7 @@ class WettestSlave(KikClientCallback):
         if not auth(from_jid):
             return
 
+        self.client.add_friend(from_jid)
         self.client.send_chat_message(from_jid, "Acknowledged.")
 
     def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage) -> None:
