@@ -434,6 +434,7 @@ class WettestSlave(KikClientCallback):
             return
 
         if maybe_tempban(chat_message):
+            logger.info("Slave: temp banning...")
             time.sleep(0.5)
             for resp in process_tempban(self.client, chat_message, chat_message.group_jid):
                 self.client.send_chat_message(chat_message.group_jid, resp)
