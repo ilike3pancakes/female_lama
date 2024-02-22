@@ -450,6 +450,33 @@ class WettestSlave(KikClientCallback):
     def on_disconnected(self):
         logger.warning(f"\n---Slave disconnected---\n")
 
+    def refresh(self) -> bool:
+        try:
+            self.online_status = False
+            if not self.my_jid:
+                print("Don't have my JID")
+                return False
+
+            self.client.send_chat_message(self.my_jid, "This is a message to myself to check if I am online.")
+            time.sleep(2)
+            if self.online_status:
+                print("Bot is online!")
+                return True
+
+            self.kik_authenticated = None
+            print("Reconnecting...")
+            self.client.disconnect()
+            self.connect()
+
+            while not self.kik_authenticated:
+                time.sleep(1)
+
+            return self.kik_authenticated
+        except Exception as e:
+            traceback.print_exc()
+            print(f"Something went wrong while refreshing! {e}")
+            return False
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -485,3 +512,7 @@ if __name__ == '__main__':
         while not bot.refresh():
             print("Refresh failed. Trying again soon...")
             time.sleep(30)
+
+        for slave_bot in slave_bots:
+            if not slave_bot.refresh():
+                print(f"Slave bot {slave_bot.my_jid} refresh failed.")
