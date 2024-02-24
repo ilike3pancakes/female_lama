@@ -34,6 +34,7 @@ admin_from_jid_prefixes = {
     "xfch5jvr65adjkbcm3hddk2fv7xfsnpiix5d3kp7q66qbgjohmha_",  # diablo@morgue
     "a6vixtbtqs5dzhv3wxgdli5krb3x67tmdh7h2dm2rhazvpx2mcna_",  # ilike3@booksandfriends
     "b22lutm5y7mxjc57yqygnbgqfhgqhya5z74to56vzb7oykrox6sa_",  # AB@booksandfriends
+    "hbpz6pb625hv3jvc6ztvnd5bhhcfhn33almsyazv3wlrap4lrbuq_",  # ilike3@booksbant
 }
 
 
