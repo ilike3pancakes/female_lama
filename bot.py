@@ -37,6 +37,7 @@ from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 from xmpp import send_vn
 
 shuffle_word = dict()
+group_to_last_status_user_jids = {}
 
 conn = sqlite3.connect("prod.db", check_same_thread=False)
 
@@ -72,9 +73,11 @@ def process_tempban(client: KikClient, message: chatting.IncomingChatMessage, as
     wettest_tempban = "wettest tempban"
     logger.info(f"Temp banning ... {message.body}")
     target_jid = message.body[len(wettest_tempban):].strip()
+    if len(target_jid) < 5:
+        target_jid = group_to_last_status_user_jids.get(associated_jid, None)
     try:
-        if " " in target_jid or not target_jid.endswith("@talk.kik.com"):
-            yield "☝️☝️ That won't work. Try it like...\n\nwettest tempban username_???@talk.kik.com"
+        if not target_jid or " " in target_jid or not target_jid.endswith("@talk.kik.com"):
+            yield "☝️☝️ That won't work. Try it like...\n\nwettest tempban groupjid@talk.kik.com"
         else:
             client.ban_member_from_group(associated_jid, target_jid)
             client.unban_member_from_group(associated_jid, target_jid)
@@ -328,6 +331,7 @@ class Wettest(KikClientCallback):
             Peers.insert(conn=conn, jid=user.jid, display_name=user.display_name)
 
     def on_group_status_received(self, response: chatting.IncomingGroupStatus):
+        group_to_last_status_user_jids[response.group_jid] = response.status_jid
         logger.info(
             f"Received status message in {response.group_jid} -- {response.status} -- status_jid={response.status_jid}"
         )
