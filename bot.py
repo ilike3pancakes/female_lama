@@ -184,13 +184,13 @@ class Wettest(KikClientCallback):
         self.client = KikClient(self, username, password, node, device_id=device_id, android_id=android_id)
 
     def on_authenticated(self):
-        print("Kik login successful!")
+        logger.info("Kik login successful!")
         self.kik_authenticated = True
         self.client.request_roster()
 
     def on_login_ended(self, response: LoginResponse):
         self.my_jid = response.kik_node + "@talk.kik.com"
-        print(f"Saved JID {self.my_jid} for refreshing")
+        logger.info(f"Saved JID {self.my_jid} for refreshing")
 
     def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
         self.online_status = True
@@ -231,15 +231,15 @@ class Wettest(KikClientCallback):
                 send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
-        print(f"[+] Chat message with ID {response.message_id} is delivered.")
+        logger.info(f"[+] Chat message with ID {response.message_id} is delivered.")
 
 
     def on_xiphias_get_users_response(self, response: Union[UsersResponse, UsersByAliasResponse]):
         for user in response.users:
-            print(f"!! {user.display_name} {user.username}")
+            logger.info(f"!! {user.display_name} {user.username}")
 
     def on_message_read(self, response: chatting.IncomingMessageReadEvent):
-        print(f"[+] Human has read the message with ID {response.message_id}.")
+        pass
 
     def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage) -> None:
         group_jid = chat_message.group_jid
@@ -302,23 +302,23 @@ class Wettest(KikClientCallback):
                 self.client.send_chat_image(group_jid, message)
 
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
-        print(f'[+] {response.from_jid} is now {"" if response.is_typing else "not "}typing.')
+        pass
 
     def on_group_is_typing_event_received(self, response: chatting.IncomingGroupIsTypingEvent):
         pass
 
     def on_roster_received(self, response: FetchRosterResponse):
-        print("[+] Chat partners:\n" + '\n'.join([str(member) for member in response.peers]))
+        logger.info("[+] Chat partners:\n" + '\n'.join([str(member) for member in response.peers]))
 
         users = [peer.jid for peer in response.peers if isinstance(peer, User)]
 
         self.client.xiphias_get_users(users)
 
     def on_friend_attribution(self, response: chatting.IncomingFriendAttribution):
-        print(f"[+] Friend attribution request from {response.referrer_jid}")
+        logger.info(f"[+] Friend attribution request from {response.referrer_jid}")
 
     def on_image_received(self, image_message: chatting.IncomingImageMessage):
-        print(f"[+] Image message was received from {image_message.from_jid}")
+        logger.info(f"[+] Image message was received from {image_message.from_jid}")
 
     def on_peer_info_received(self, response: PeersInfoResponse):
         logger.info(f"[+] Peer info for {len(response.users)} users")
@@ -328,35 +328,37 @@ class Wettest(KikClientCallback):
             Peers.insert(conn=conn, jid=user.jid, display_name=user.display_name)
 
     def on_group_status_received(self, response: chatting.IncomingGroupStatus):
-        print(f"[+] Status message in {response.group_jid}: {response.status}")
+        logger.info(
+            f"Received status message in {response.group_jid} -- {response.status} -- status_jid={response.status_jid}"
+        )
 
     def on_group_receipts_received(self, response: chatting.IncomingGroupReceiptsEvent):
-        print(f'[+] Received receipts in group {response.group_jid}: {",".join(response.receipt_ids)}')
+        pass
 
     def on_status_message_received(self, response: chatting.IncomingStatusResponse):
-        print(f"[+] Status message from {response.from_jid}: {response.status}")
+        pass
 
     def on_username_uniqueness_received(self, response: UsernameUniquenessResponse):
-        print(f"Is {response.username} a unique username? {response.unique}")
+        logger.info(f"Is {response.username} a unique username? {response.unique}")
 
     def on_sign_up_ended(self, response: RegisterResponse):
-        print(f"[+] Registered as {response.kik_node}")
+        logger.info(f"[+] Registered as {response.kik_node}")
 
     def on_connection_failed(self, response: ConnectionFailedResponse):
-        print("Connection failed!")
+        logger.info("Connection failed!")
         self.kik_authenticated = False
 
-        print(f"[-] Connection failed: {response.message}")
+        logger.info(f"[-] Connection failed: {response.message}")
 
     def on_login_error(self, login_error: LoginError):
-        print("Kik login failed!")
+        logger.info("Kik login failed!")
         self.kik_authenticated = False
 
         if login_error.is_captcha():
             login_error.solve_captcha_wizard(self.client)
 
     def on_register_error(self, response: SignUpError):
-        print(f"[-] Register error: {response.message}")
+        logger.info(f"[-] Register error: {response.message}")
 
     def on_disconnected(self):
         logger.warning(f"\n---Disconnected---\n")
@@ -365,17 +367,17 @@ class Wettest(KikClientCallback):
         try:
             self.online_status = False
             if not self.my_jid:
-                print("Don't have my JID")
+                logger.info("Don't have my JID")
                 return False
 
             self.client.send_chat_message(self.my_jid, "This is a message to myself to check if I am online.")
             time.sleep(2)
             if self.online_status:
-                print("Bot is online!")
+                logger.info("Bot is online!")
                 return True
 
             self.kik_authenticated = None
-            print("Reconnecting...")
+            logger.info("Reconnecting...")
             self.client.disconnect()
             self.connect()
 
@@ -385,7 +387,7 @@ class Wettest(KikClientCallback):
             return self.kik_authenticated
         except Exception as e:
             traceback.print_exc()
-            print(f"Something went wrong while refreshing! {e}")
+            logger.info(f"Something went wrong while refreshing! {e}")
             return False
 
 
@@ -411,13 +413,13 @@ class WettestSlave(KikClientCallback):
         self.client = KikClient(self, username, password, node, device_id=device_id, android_id=android_id)
 
     def on_authenticated(self):
-        print("Slave kik login successful!")
+        logger.info("Slave kik login successful!")
         self.kik_authenticated = True
         self.client.request_roster()
 
     def on_login_ended(self, response: LoginResponse):
         self.my_jid = response.kik_node + "@talk.kik.com"
-        print(f"Slave saved JID {self.my_jid} for refreshing")
+        logger.info(f"Slave saved JID {self.my_jid} for refreshing")
 
     def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
         self.online_status = True
@@ -440,11 +442,11 @@ class WettestSlave(KikClientCallback):
                 self.client.send_chat_message(chat_message.group_jid, resp)
 
     def on_connection_failed(self, response: ConnectionFailedResponse):
-        print("Slave connection failed!")
+        logger.info("Slave connection failed!")
         self.kik_authenticated = False
 
     def on_login_error(self, login_error: LoginError):
-        print("Slave kik login failed!")
+        logger.info("Slave kik login failed!")
         self.kik_authenticated = False
 
     def on_disconnected(self):
@@ -454,17 +456,17 @@ class WettestSlave(KikClientCallback):
         try:
             self.online_status = False
             if not self.my_jid:
-                print("Don't have my JID")
+                logger.info("Don't have my JID")
                 return False
 
             self.client.send_chat_message(self.my_jid, "This is a message to myself to check if I am online.")
             time.sleep(2)
             if self.online_status:
-                print("Bot is online!")
+                logger.info("Bot is online!")
                 return True
 
             self.kik_authenticated = None
-            print("Reconnecting...")
+            logger.info("Reconnecting...")
             self.client.disconnect()
             self.connect()
 
@@ -474,7 +476,7 @@ class WettestSlave(KikClientCallback):
             return self.kik_authenticated
         except Exception as e:
             traceback.print_exc()
-            print(f"Something went wrong while refreshing! {e}")
+            logger.info(f"Something went wrong while refreshing! {e}")
             return False
 
 
@@ -508,11 +510,11 @@ if __name__ == '__main__':
 
     while True:
         time.sleep(120)
-        print("Refreshing...")
+        logger.info("Refreshing...")
         while not bot.refresh():
-            print("Refresh failed. Trying again soon...")
+            logger.info("Refresh failed. Trying again soon...")
             time.sleep(30)
 
         for slave_bot in slave_bots:
             if not slave_bot.refresh():
-                print(f"Slave bot {slave_bot.my_jid} refresh failed.")
+                logger.info(f"Slave bot {slave_bot.my_jid} refresh failed.")
