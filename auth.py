@@ -32,6 +32,8 @@ admin_from_jid_prefixes = {
     "b22lutm5y7mxjc57yqygnbgqfhgqhya5z74to56vzb7oykrox6sa_",  # AB@booksandfriends
 
     "jxlswh5ml6qbkm6ditnwdz6s4itwnz22ugr73nky7mk73zvk3s6a_",  # ilike3@makefriendsandameme
+
+    "hbpz6pb625hv3jvc6ztvnd5bhhcfhn33almsyazv3wlrap4lrbuq_",  # ilike3@booksbant
 }
 
 
