@@ -233,6 +233,7 @@ class Wettest(KikClientCallback):
             elif isinstance(message, VoiceNote):
                 logger.info(f"Sending a voice note from {len(message.mp3_bytes)} mp3 bytes...")
                 send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
+                logger.info("Voice note sent!")
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
         pass
