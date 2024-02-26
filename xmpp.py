@@ -70,7 +70,7 @@ class VoiceNoteSerilizeWrapper:
         return self.packets
 
 
-def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> list[str]:
+def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> VoiceNoteSerilizeWrapper:
     logger.info("Building vn packets...")
     timestamp = str(int(round(time.time() * 1000)))
     message_type = "groupchat" if is_group else "chat"
@@ -185,5 +185,5 @@ def send_vn(client: KikClient, group_jid: str, voice_mp3_bytes: bytes, *, is_gro
     peer_jid = client.get_jid(group_jid)
     logger.info("Got peer jid")
     vn_request = vn_packets(peer_jid, voice_mp3_bytes, is_group=is_group)
-    logger.info(f"Got {len(vn_request)} vn packets")
+    logger.info(f"Got {len(vn_request.serialize())} vn packets")
     return client._send_xmpp_element(vn_request)
