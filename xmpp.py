@@ -4,6 +4,10 @@ import time
 from kik_unofficial.client import KikClient
 from kik_unofficial.utilities.cryptographic_utilities import CryptographicUtils
 
+from log import get_logger
+
+logger = get_logger()
+
 
 # Derived from image:
 # data = (
@@ -67,12 +71,15 @@ class VoiceNoteSerilizeWrapper:
 
 
 def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> list[str]:
+    logger.info("Building vn packets...")
     timestamp = str(int(round(time.time() * 1000)))
     message_type = "groupchat" if is_group else "chat"
     message_id = CryptographicUtils.make_kik_uuid()
     content_id = CryptographicUtils.make_kik_uuid()
 
     encoded = base64.b64encode(content)
+
+    logger.info("Have b64-encoded content...")
 
     # data = (
     #     f'<message to="{peer_jid}" id="{message_id}" cts="{timestamp}" type="{message_type}" xmlns="jabber:client">'
@@ -169,15 +176,14 @@ def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> list[str
         )
     )
 
-
     packets = [data[s:s+16384].encode() for s in range(0, len(data), 16384)]
     return VoiceNoteSerilizeWrapper(list(packets))
 
 
 def send_vn(client: KikClient, group_jid: str, voice_mp3_bytes: bytes, *, is_group: bool = True) -> str:
-    print("send_vn")
+    logger.info("send_vn")
     peer_jid = client.get_jid(group_jid)
-    print("Got peer jid")
+    logger.info("Got peer jid")
     vn_request = vn_packets(peer_jid, voice_mp3_bytes, is_group=is_group)
-    print(f"Got {len(vn_request)} vn packets")
+    logger.info(f"Got {len(vn_request)} vn packets")
     return client._send_xmpp_element(vn_request)

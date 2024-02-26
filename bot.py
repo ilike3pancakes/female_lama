@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import datetime
-import logging
 import random
 import sqlite3
 import sys
@@ -27,6 +26,7 @@ from kik_unofficial.datatypes.xmpp.xiphias import UsersResponse, UsersByAliasRes
 
 import ai
 import calculate
+from log import get_logger
 from points import atomic_incr
 from urban import urban
 import shuffle
@@ -35,6 +35,9 @@ from peers import Peers
 from trigger import create_trigger, evaluate_all_triggers, TriggerSpecs
 from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 from xmpp import send_vn
+
+
+logger = get_logger()
 
 shuffle_word = dict()
 group_to_last_status_user_jids = {}
@@ -64,10 +67,8 @@ async_queue: list[Callable[[], None]] = []
 def maybe_tempban(message: chatting.IncomingChatMessage) -> bool:
     message_body = message.body.lower()
     wettest_tempban = "wettest tempban"
-    if message_body.startswith(wettest_tempban):
-        return True
+    return message_body.startswith(wettest_tempban)
 
-    return False
 
 def process_tempban(client: KikClient, message: chatting.IncomingChatMessage, associated_jid: str) -> Generator[str, None, None]:
     wettest_tempban = "wettest tempban"
@@ -497,13 +498,6 @@ if __name__ == '__main__':
 
     with open(args.credentials) as f:
         creds = yaml.safe_load(f)
-
-    # set up logging
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setFormatter(logging.Formatter(KikClient.log_format()))
-    logger.addHandler(stream_handler)
 
     # create slave bots
     slave_bots = [WettestSlave(slave_creds) for slave_creds in creds.get("slaves") if "slaves" in creds.keys()]
