@@ -211,7 +211,7 @@ class Wettest(KikClientCallback):
             )
             shuffled = reshuffle_word(from_jid)
             self.client.send_chat_message(from_jid, f"What about {shuffled} ? 😮‍💨☝️")
-        else:
+        elif word and chat_message.body and len(chat_message.body.strip().split(" ")) == 1:
             logger.info(f"{word} != {chat_message.body}")
 
         trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=TriggerSpecs.default_ctor)
@@ -230,6 +230,7 @@ class Wettest(KikClientCallback):
             elif isinstance(message, bytes):
                 self.client.send_chat_image(from_jid, message)
             elif isinstance(message, VoiceNote):
+                logger.info("Sending a voice note...")
                 send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
@@ -237,8 +238,8 @@ class Wettest(KikClientCallback):
 
 
     def on_xiphias_get_users_response(self, response: Union[UsersResponse, UsersByAliasResponse]):
-        for user in response.users:
-            logger.info(f"!! {user.display_name} {user.username}")
+        # Always seems to contain None None
+        pass
 
     def on_message_read(self, response: chatting.IncomingMessageReadEvent):
         pass

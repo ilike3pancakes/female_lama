@@ -58,6 +58,13 @@ from kik_unofficial.utilities.cryptographic_utilities import CryptographicUtils
     #     '</message>'
     # )
 
+class VoiceNoteSerilizeWrapper:
+    def __init__(self, packets: list):
+        self.packets = packets
+
+    def serialize(self) -> list:
+        return self.packets
+
 
 def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> list[str]:
     timestamp = str(int(round(time.time() * 1000)))
@@ -164,10 +171,11 @@ def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> list[str
 
 
     packets = [data[s:s+16384].encode() for s in range(0, len(data), 16384)]
-    return list(packets)
+    return VoiceNoteSerilizeWrapper(list(packets))
 
 
 def send_vn(client: KikClient, group_jid: str, voice_mp3_bytes: bytes, *, is_group: bool = True) -> str:
     peer_jid = client.get_jid(group_jid)
     vn_request = vn_packets(peer_jid, voice_mp3_bytes, is_group=is_group)
+    print(f"Got {len(vn_request)} vn packets")
     return client._send_xmpp_element(vn_request)
