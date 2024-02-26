@@ -230,12 +230,11 @@ class Wettest(KikClientCallback):
             elif isinstance(message, bytes):
                 self.client.send_chat_image(from_jid, message)
             elif isinstance(message, VoiceNote):
-                logger.info("Sending a voice note...")
+                logger.info(f"Sending a voice note from {len(message.mp3_bytes)} mp3 bytes...")
                 send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
-        logger.info(f"[+] Chat message with ID {response.message_id} is delivered.")
-
+        pass
 
     def on_xiphias_get_users_response(self, response: Union[UsersResponse, UsersByAliasResponse]):
         # Always seems to contain None None

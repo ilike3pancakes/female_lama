@@ -175,7 +175,9 @@ def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> list[str
 
 
 def send_vn(client: KikClient, group_jid: str, voice_mp3_bytes: bytes, *, is_group: bool = True) -> str:
+    print("send_vn")
     peer_jid = client.get_jid(group_jid)
+    print("Got peer jid")
     vn_request = vn_packets(peer_jid, voice_mp3_bytes, is_group=is_group)
     print(f"Got {len(vn_request)} vn packets")
     return client._send_xmpp_element(vn_request)
