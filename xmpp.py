@@ -143,11 +143,10 @@ def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> VoiceNot
     <pb/>
     <kik push="true" qos="true" timestamp="{timestamp}"/>
     <request d="true" r="true" xmlns="kik:message:receipt"/>
-    <content app-id="com.kik.ext.video-gallery" id="{content_id}" v="2">
+    <content app-id="com.kik.ext.gallery" id="{content_id}" v="2">
         <strings>
             <app-name>Gallery</app-name>
             <allow-forward>false</allow-forward>
-            <layout>video</layout>
             <file-url>data:audio/mpeg;base64,{encoded}</file-url>
         </strings>
         <extras>
