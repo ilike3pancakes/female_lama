@@ -67,33 +67,103 @@ def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> list[str
 
     encoded = base64.b64encode(content)
 
+    # data = (
+    #     f'<message to="{peer_jid}" id="{message_id}" cts="{timestamp}" type="{message_type}" xmlns="jabber:client">'
+    #     f'<kik timestamp="{timestamp}" qos="true" push="true"/>'
+    #     '<request xmlns="kik:message:receipt" d="true" r="true" />'
+
+    #     f'<content id="{content_id}" v="2" app-id="com.kik.ext.gallery">'
+
+    #     '<strings>'
+    #     '<app-name>Audio</app-name>'
+    #     f'<allow-forward>{str(True).lower()}</allow-forward>'
+    #     '<disallow-save>false</disallow-save>'
+    #     f'<file-url>data:audio/mpeg;base64,{encoded}</file-url>'
+    #     '</strings>'
+
+    #     '<images>'
+    #     f'<preview>{encoded}</preview>'
+    #     '<icon></icon>'
+    #     '</images>'
+
+    #     '<uris />'
+
+    #     '</content>'
+    #     '</message>'
+    # )
+
+# Working video XML that schizo gave me:
+    """
+<message cts="[TS]" id="[UUID]" to="[GROUP_JID]@groups.kik.com" type="groupchat" xmlns="kik:groups">
+    <pb/>
+    <kik push="true" qos="true" timestamp="[TS]"/>
+    <request d="true" r="true" xmlns="kik:message:receipt"/>
+    <content app-id="com.kik.ext.video-gallery" id="[CONTENT_ID]" v="2">
+        <strings>
+            <app-name>Gallery</app-name>
+            <file-size>[FILE_SIZE]</file-size>
+            <allow-forward>true</allow-forward>
+            <layout>video</layout>
+            <file-name>[FILE_NAME].mp4</file-name>
+            <duration>[DURATION_MS]</duration>
+        </strings>
+        <extras>
+            <item>
+                <key>needstranscoding</key>
+                <val>false</val>
+            </item>
+        </extras>
+        <hashes/>
+        <images>
+            <preview>BLOB</preview>
+            <icon>[ICON_BASE64]</icon>
+        </images>
+        <uris/>
+    </content>
+</message>
+    """
+
     data = (
-        f'<message to="{peer_jid}" id="{message_id}" cts="{timestamp}" type="{message_type}" xmlns="jabber:client">'
-        f'<kik timestamp="{timestamp}" qos="true" push="true"/>'
-        '<request xmlns="kik:message:receipt" d="true" r="true" />'
-
-        f'<content id="{content_id}" v="2" app-id="com.kik.ext.gallery">'
-
-        '<strings>'
-        '<app-name>Audio</app-name>'
-        f'<allow-forward>{str(True).lower()}</allow-forward>'
-        '<disallow-save>false</disallow-save>'
-        f'<file-url>data:audio/mpeg;base64,{encoded}</file-url>'
-        '</strings>'
-
-        '<images>'
-        f'<preview>{encoded}</preview>'
-        '<icon></icon>'
-        '</images>'
-
-        '<uris />'
-
-        '</content>'
-        '</message>'
+        """
+<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_type}" xmlns="kik:groups">
+    <pb/>
+    <kik push="true" qos="true" timestamp="{timestamp}"/>
+    <request d="true" r="true" xmlns="kik:message:receipt"/>
+    <content app-id="com.kik.ext.video-gallery" id="{content_id}" v="2">
+        <strings>
+            <app-name>Gallery</app-name>
+            <allow-forward>false</allow-forward>
+            <layout>video</layout>
+            <file-url>data:audio/mpeg;base64,{encoded}</file-url>
+        </strings>
+        <extras>
+            <item>
+                <key>needstranscoding</key>
+                <val>false</val>
+            </item>
+        </extras>
+        <hashes/>
+        <images>
+            <preview>{encoded}</preview>
+            <icon></icon>
+        </images>
+        <uris/>
+    </content>
+</message>
+        """
+        .strip()
+        .format(
+            timestamp=timestamp,
+            message_id=message_id,
+            peer_jid=peer_jid,
+            message_type=message_type,
+            content_id=content_id,
+            encoded=encoded,
+        )
     )
 
 
-    packets =  [data[s:s+16384].encode() for s in range(0, len(data), 16384)]
+    packets = [data[s:s+16384].encode() for s in range(0, len(data), 16384)]
     return list(packets)
 
 

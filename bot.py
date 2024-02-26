@@ -31,8 +31,8 @@ from points import atomic_incr
 from urban import urban
 import shuffle
 from auth import auth
-from peers import Peer, Peers
-from trigger import create_trigger, Trigger, evaluate_all_triggers, TriggerSpecs
+from peers import Peers
+from trigger import create_trigger, evaluate_all_triggers, TriggerSpecs
 from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 from xmpp import send_vn
 
@@ -81,7 +81,6 @@ def process_tempban(client: KikClient, message: chatting.IncomingChatMessage, as
         else:
             client.ban_member_from_group(associated_jid, target_jid)
             client.unban_member_from_group(associated_jid, target_jid)
-            # async_queue.append(lambda: client.ban_member_from_group(associated_jid, target_jid) and client.unban_member_from_group(associated_jid, target_jid))
     except Exception as e:
         logger.error(f"Error: {e}")
 
