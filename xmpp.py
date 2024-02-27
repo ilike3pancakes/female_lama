@@ -135,41 +135,30 @@ def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> VoiceNot
     """
 
     data = (
-        """
-<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_type}" xmlns="kik:groups">
-    <pb/>
-    <kik push="true" qos="true" timestamp="{timestamp}"/>
-    <request d="true" r="true" xmlns="kik:message:receipt"/>
-    <content app-id="com.kik.ext.gallery" id="{content_id}" v="2">
-        <strings>
-            <app-name>Gallery</app-name>
-            <allow-forward>false</allow-forward>
-            <file-url>data:audio/mpeg;base64,{encoded}</file-url>
-        </strings>
-        <extras>
-            <item>
-                <key>needstranscoding</key>
-                <val>false</val>
-            </item>
-        </extras>
-        <hashes/>
-        <images>
-            <preview>{encoded}</preview>
-            <icon></icon>
-        </images>
-        <uris/>
-    </content>
-</message>
-        """
-        .strip()
-        .format(
-            timestamp=timestamp,
-            message_id=message_id,
-            peer_jid=peer_jid,
-            message_type=message_type,
-            content_id=content_id,
-            encoded=encoded,
-        )
+f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_type}" xmlns="kik:groups">'
+    f'<pb/>'
+    f'<kik push="true" qos="true" timestamp="{timestamp}"/>'
+    f'<request d="true" r="true" xmlns="kik:message:receipt"/>'
+    f'<content app-id="com.kik.ext.gallery" id="{content_id}" v="2">'
+        f'<strings>'
+            f'<app-name>Gallery</app-name>'
+            f'<allow-forward>false</allow-forward>'
+            f'<file-url>data:audio/mpeg;base64,{encoded}</file-url>'
+        f'</strings>'
+        f'<extras>'
+            f'<item>'
+                f'<key>needstranscoding</key>'
+                f'<val>false</val>'
+            f'</item>'
+        f'</extras>'
+        f'<hashes/>'
+        f'<images>'
+            f'<preview>{encoded}</preview>'
+            f'<icon></icon>'
+        f'</images>'
+        f'<uris/>'
+    f'</content>'
+f'</message>'
     )
 
     packets = [data[s:s+16384].encode() for s in range(0, len(data), 16384)]
