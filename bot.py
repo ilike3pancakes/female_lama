@@ -235,8 +235,7 @@ class Wettest(KikClientCallback):
                 try:
                     send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
                 except Exception as e:
-                    logger.info("An error occurred sending voice note {e}")
-                    traceback.print_exc()
+                    logger.info(f"An error occurred sending voice note {e}\n{sys.exc_info()}")
                 logger.info("Voice note sent!")
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
