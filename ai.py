@@ -177,7 +177,7 @@ def tts(body: str, save: bool = False) -> bytes:
         with open("tmp.mp3", "wb") as f:
             f.write(bytes_)
 
-    return response.read()
+    return bytes_
 
 
 if __name__ == "__main__":

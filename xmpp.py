@@ -1,10 +1,15 @@
 from __future__ import annotations
 import base64
+import hashlib
+import io
 import time
 from kik_unofficial.client import KikClient
+from kik_unofficial.utilities.blockhash import blockhash
 from kik_unofficial.utilities.cryptographic_utilities import CryptographicUtils
+from kik_unofficial.utilities.parsing_utilities import ParsingUtilities
 
 from log import get_logger
+
 
 logger = get_logger()
 
@@ -61,6 +66,33 @@ logger = get_logger()
     #     '</content>'
     #     '</message>'
     # )
+
+
+def parse_audio(mp3_audio_bytes: bytes) -> dict[str, str]:
+    mp3_audio_bytes = io.BytesIO(mp3_audio_bytes)
+    mp3_audio_bytes.name = "temp.mp3"
+
+    size = mp3_audio_bytes.tell()
+    final_og = mp3_audio_bytes.getvalue()
+    final_pre = mp3_audio_bytes.getvalue()
+
+    base64 = ParsingUtilities.read_file_as_base64(final_pre)
+    sha1_og = ParsingUtilities.read_file_as_sha1(final_og)
+    sha1_scaled = ParsingUtilities.read_file_as_sha1(final_pre)
+    block_scaled = blockhash(mp3_audio_bytes, 16)
+    md5 = hashlib.md5(final_og).hexdigest()
+    mp3_audio_bytes.close()
+
+    return {
+        'base64': base64,
+        'size': size,
+        'original': final_og,
+        'SHA1': sha1_og,
+        'SHA1Scaled': sha1_scaled,
+        'blockhash': block_scaled,
+        'MD5': md5,
+    }
+
 
 class VoiceNoteSerilizeWrapper:
     def __init__(self, packets: list):
@@ -134,6 +166,8 @@ def vn_packets(peer_jid: str, content: bytes, is_group: bool = True) -> VoiceNot
 </message>
     """
 
+    parsed = parse_audio(content)
+
     data = (
 f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_type}" xmlns="kik:groups">'
     f'<pb/>'
@@ -142,8 +176,11 @@ f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_ty
     f'<content app-id="com.kik.ext.gallery" id="{content_id}" v="2">'
         f'<strings>'
             f'<app-name>Gallery</app-name>'
+            f'<file-size>{parsed["size"]}</file-size>'
+            f'<layout>video</layout>'  # TODO: try audio
             f'<allow-forward>false</allow-forward>'
-            f'<file-url>data:audio/mpeg;base64,{encoded}</file-url>'
+            f'<file-name>{content_id}.mp3</file-name>'
+            f'<duration>{5000}</duration>'
         f'</strings>'
         f'<extras>'
             f'<item>'

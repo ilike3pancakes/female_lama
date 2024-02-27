@@ -232,7 +232,10 @@ class Wettest(KikClientCallback):
                 self.client.send_chat_image(from_jid, message)
             elif isinstance(message, VoiceNote):
                 logger.info(f"Sending a voice note from {len(message.mp3_bytes)} mp3 bytes...")
-                send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
+                try:
+                    send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
+                except:
+                    logger.info("An error occurred sending voice note")
                 logger.info("Voice note sent!")
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
