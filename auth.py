@@ -34,6 +34,7 @@ admin_from_jid_prefixes = {
     "jxlswh5ml6qbkm6ditnwdz6s4itwnz22ugr73nky7mk73zvk3s6a_",  # ilike3@makefriendsandameme
 
     "hbpz6pb625hv3jvc6ztvnd5bhhcfhn33almsyazv3wlrap4lrbuq_",  # ilike3@booksbant
+    "thdjn4x6hpve7jfubqbhurmzjmfud4o6vydsh6ldhgz6bwi447cq_",  # blas@booksban
 }
 
 
