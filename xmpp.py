@@ -176,7 +176,7 @@ f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_ty
         f'<strings>'
             f'<app-name>audio</app-name>'  # "Gallery" does something but Schizo says it should be called "audio"
             f'<file-size>{parsed["size"]}</file-size>'
-            f'<layout>video</layout>'  # audio seems to send an empty message with a share button
+            f'<layout>audio</layout>'  # audio seems to send an empty message with a share button. video is a real element.
             f'<allow-forward>false</allow-forward>'
             f'<file-name>{content_id}.mp3</file-name>'
             f'<duration>{5000}</duration>'
@@ -189,7 +189,7 @@ f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_ty
         f'</extras>'
         f'<hashes/>'
         f'<images>'
-            f'<preview>Test</preview>'
+            f'<preview></preview>'
             f'<icon></icon>'
         f'</images>'
         f'<uris>'
