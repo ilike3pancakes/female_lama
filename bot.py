@@ -325,7 +325,7 @@ class Wettest(KikClientCallback):
         logger.info(f"[+] Friend attribution request from {response.referrer_jid}")
 
     def on_image_received(self, image_message: chatting.IncomingImageMessage):
-        logger.info(f"[+] Image message was received from {image_message.from_jid}")
+        pass
 
     def on_peer_info_received(self, response: PeersInfoResponse):
         logger.info(f"[+] Peer info for {len(response.users)} users")

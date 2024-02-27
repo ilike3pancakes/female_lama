@@ -176,7 +176,7 @@ f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_ty
         f'<strings>'
             f'<app-name>Gallery</app-name>'
             f'<file-size>{parsed["size"]}</file-size>'
-            f'<layout>audio</layout>'  # TODO: try audio
+            f'<layout>video</layout>'  # audio seems to send an empty message with a share button
             f'<allow-forward>false</allow-forward>'
             f'<file-name>{content_id}.mp3</file-name>'
             f'<duration>{5000}</duration>'
