@@ -327,6 +327,9 @@ class Wettest(KikClientCallback):
     def on_image_received(self, image_message: chatting.IncomingImageMessage):
         pass
 
+    def on_video_received(self, video_message: chatting.IncomingVideoMessage):
+        logger.info(f"!! Received a video message {video_message.message_id} {video_message.duration_milliseconds} {video_message.file_content_type} {video_message.file_size} {video_message.from_jid} {video_message.group_jid} {video_message.message_id} {video_message.metadata} {video_message.raw_element} {video_message.request_delivered_receipt} {video_message.requets_read_receipt} {video_message.to_jid} {video_message.video_url}")
+
     def on_peer_info_received(self, response: PeersInfoResponse):
         logger.info(f"[+] Peer info for {len(response.users)} users")
 
