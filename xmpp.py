@@ -174,7 +174,7 @@ f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_ty
     f'<request d="true" r="true" xmlns="kik:message:receipt"/>'
     f'<content app-id="com.kik.ext.gallery" id="{content_id}" v="2">'
         f'<strings>'
-            f'<app-name>Gallery</app-name>'
+            f'<app-name>Gallery</app-name>'  # "Gallery" does something but Schizo says it should be called "audio"
             f'<file-size>{parsed["size"]}</file-size>'
             f'<layout>video</layout>'  # audio seems to send an empty message with a share button
             f'<allow-forward>false</allow-forward>'
@@ -189,10 +189,12 @@ f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_ty
         f'</extras>'
         f'<hashes/>'
         f'<images>'
-            f'<preview>{encoded}</preview>'
+            f'<preview></preview>'
             f'<icon></icon>'
         f'</images>'
-        f'<uris/>'
+        f'<uris>'
+          f'<uri priority="0" type="audio" file-content-type="audio/mpeg">data:audio/mpeg;base64,{encoded}</uri>'
+        f'</uris>'
     f'</content>'
 f'</message>'
     )
