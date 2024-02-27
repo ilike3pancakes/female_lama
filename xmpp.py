@@ -4,7 +4,6 @@ import hashlib
 import io
 import time
 from kik_unofficial.client import KikClient
-from kik_unofficial.utilities.blockhash import blockhash
 from kik_unofficial.utilities.cryptographic_utilities import CryptographicUtils
 from kik_unofficial.utilities.parsing_utilities import ParsingUtilities
 
@@ -79,7 +78,6 @@ def parse_audio(mp3_audio_bytes: bytes) -> dict[str, str]:
     base64 = ParsingUtilities.read_file_as_base64(final_pre)
     sha1_og = ParsingUtilities.read_file_as_sha1(final_og)
     sha1_scaled = ParsingUtilities.read_file_as_sha1(final_pre)
-    block_scaled = blockhash(mp3_audio_bytes, 16)
     md5 = hashlib.md5(final_og).hexdigest()
     mp3_audio_bytes.close()
 
@@ -89,7 +87,6 @@ def parse_audio(mp3_audio_bytes: bytes) -> dict[str, str]:
         'original': final_og,
         'SHA1': sha1_og,
         'SHA1Scaled': sha1_scaled,
-        'blockhash': block_scaled,
         'MD5': md5,
     }
 
