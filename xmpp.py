@@ -92,8 +92,10 @@ def parse_audio(mp3_audio_bytes: bytes) -> dict[str, str]:
 
 
 class VoiceNoteSerilizeWrapper:
-    def __init__(self, packets: list):
+    def __init__(self, packets: list, message_id: str, content_id: str):
         self.packets = packets
+        self.message_id = message_id
+        self.content_id = content_id
 
     def serialize(self) -> list:
         return self.packets
@@ -174,7 +176,7 @@ f'<message cts="{timestamp}" id="{message_id}" to="{peer_jid}" type="{message_ty
         f'<strings>'
             f'<app-name>Gallery</app-name>'
             f'<file-size>{parsed["size"]}</file-size>'
-            f'<layout>video</layout>'  # TODO: try audio
+            f'<layout>audio</layout>'  # TODO: try audio
             f'<allow-forward>false</allow-forward>'
             f'<file-name>{content_id}.mp3</file-name>'
             f'<duration>{5000}</duration>'
@@ -196,7 +198,7 @@ f'</message>'
     )
 
     packets = [data[s:s+16384].encode() for s in range(0, len(data), 16384)]
-    return VoiceNoteSerilizeWrapper(list(packets))
+    return VoiceNoteSerilizeWrapper(list(packets), message_id, content_id)
 
 
 def send_vn(client: KikClient, group_jid: str, voice_mp3_bytes: bytes, *, is_group: bool = True) -> str:
