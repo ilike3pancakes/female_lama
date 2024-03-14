@@ -320,8 +320,6 @@ class Wettest(KikClientCallback):
         pass
 
     def on_roster_received(self, response: FetchRosterResponse):
-        logger.info("[+] Chat partners:\n" + '\n'.join([str(member) for member in response.peers]))
-
         users = [peer.jid for peer in response.peers if isinstance(peer, User)]
 
         self.client.xiphias_get_users(users)

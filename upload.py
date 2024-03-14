@@ -88,4 +88,5 @@ def _content_upload_thread(
 ):
     r = requests.put(url, data=video_bytes, headers=headers)
     if r.status_code != 200:
+        log.error(f"failed to upload video {r.status_code}")
         raise KikUploadError(r.status_code, r.reason)
