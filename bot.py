@@ -315,7 +315,7 @@ class Wettest(KikClientCallback):
                 self.client.send_chat_image(group_jid, message)
             elif isinstance(message, VoiceNote):
                 logger.info(f"Sending a voice note from {len(message.mp4_bytes)} mp4 bytes...")
-                send_vn(self.client, group_jid, message.mp4_bytes, is_group=False)
+                send_vn(self.client, group_jid, message.mp4_bytes, is_group=True)
                 logger.info("Voice note sent!")
 
     def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
