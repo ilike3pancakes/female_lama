@@ -32,9 +32,15 @@ admin_from_jid_prefixes = {
     "b22lutm5y7mxjc57yqygnbgqfhgqhya5z74to56vzb7oykrox6sa_",  # AB@booksandfriends
 
     "jxlswh5ml6qbkm6ditnwdz6s4itwnz22ugr73nky7mk73zvk3s6a_",  # ilike3@makefriendsandameme
+    "tudrprwpzhjgprhc6wqin562xumjtkcsloqdgr7simakei2fwsma_",  # yuno@makefriendsandameme
+    "j3iqqaw6ezhm3f5pfwniaqjc42xbymqz6hovr3v5lsekepbkfg6a_",  # moon@makefriendsandameme
+    "vgs5pqqa7csobgks6uqd3qev2ncoe54mmqx2qrwefee4afa57wtq_",  # burger@makefriendsandameme
 
-    "hbpz6pb625hv3jvc6ztvnd5bhhcfhn33almsyazv3wlrap4lrbuq_",  # ilike3@booksbant
-    "thdjn4x6hpve7jfubqbhurmzjmfud4o6vydsh6ldhgz6bwi447cq_",  # blas@booksban
+    "hbpz6pb625hv3jvc6ztvnd5bhhcfhn33almsyazv3wlrap4lrbuq_",  # ilike3@booksbanter
+    "thdjn4x6hpve7jfubqbhurmzjmfud4o6vydsh6ldhgz6bwi447cq_",  # blas@booksbanter
+    "bkzacon26m4a54lhknm5tqozqq6booelrfxtjoewct4jjw7w34bq_",  # Prophet@booksbanter
+    "qetderkeqgok4ujutyc3othdyzsg5zl2bs6k4gjpcldonrvjpvdq_",  # Vixxxy@booksbanter
+    "jskmozxcjdvmtf27xej72i57oycuudtgaxggn2fqcquwyexj3mhq_",  # trashcomp@booksb
 }
 
 
