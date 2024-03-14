@@ -32,6 +32,7 @@ from urban import urban
 import shuffle
 from auth import auth
 from peers import Peers
+from remux import remux
 from trigger import create_trigger, evaluate_all_triggers, TriggerSpecs
 from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 from xmpp import send_vn
@@ -59,7 +60,7 @@ def reshuffle_word(associated_jid: str) -> str:
 
 @dataclass
 class VoiceNote:
-    mp3_bytes: bytes
+    mp4_bytes: bytes
 
 async_queue: list[Callable[[], None]] = []
 
@@ -130,7 +131,8 @@ def process_authenticated_chat_message(
         yield "I'll record"
         completion = ai.wettest_gpt_completion_of(message.body[len("wettest vn "):])
         mp3_bytes = ai.tts(completion)
-        yield VoiceNote(mp3_bytes=mp3_bytes)
+        mp4_bytes = remux(mp3_bytes=mp3_bytes).mp4_bytes_with_one_h264_stream_and_one_aac_stream
+        yield VoiceNote(mp4_bytes=mp4_bytes)
     elif message_body.startswith("wettest"):
         username = Peers.get(message.from_jid, conn=conn)
         friendly = "Rompe" in username if username else False
@@ -231,9 +233,9 @@ class Wettest(KikClientCallback):
             elif isinstance(message, bytes):
                 self.client.send_chat_image(from_jid, message)
             elif isinstance(message, VoiceNote):
-                logger.info(f"Sending a voice note from {len(message.mp3_bytes)} mp3 bytes...")
+                logger.info(f"Sending a voice note from {len(message.mp4_bytes)} mp4 bytes...")
                 try:
-                    send_vn(self.client, from_jid, message.mp3_bytes, is_group=False)
+                    send_vn(self.client, from_jid, message.mp4_bytes, is_group=False)
                 except Exception as e:
                     logger.info(f"An error occurred sending voice note {e}\n{sys.exc_info()}")
                 logger.info("Voice note sent!")
