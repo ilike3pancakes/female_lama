@@ -14,11 +14,9 @@ class KikMp4:
 
 
 def remux(mp3_bytes: bytes) -> KikMp4:
-    with (
-        tempfile.NamedTemporaryFile(suffix='.mp3') as temp_mp3_file,
-        tempfile.NamedTemporaryFile(suffix='.mp4') as temp_mp4_file,
-        open('ffmpeg.log', 'w') as logfile,
-    ):
+    with tempfile.NamedTemporaryFile(suffix='.mp3') as temp_mp3_file, \
+        tempfile.NamedTemporaryFile(suffix='.mp4') as temp_mp4_file, \
+        open('ffmpeg.log', 'w') as logfile:
 
         temp_mp3_file.write(mp3_bytes)
         temp_mp3_file.flush()
