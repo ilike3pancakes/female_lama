@@ -131,7 +131,10 @@ def process_authenticated_chat_message(
         yield "I'll record"
         completion = ai.wettest_gpt_completion_of(message.body[len("wettest vn "):])
         mp3_bytes = ai.tts(completion)
-        mp4_bytes = remux(mp3_bytes=mp3_bytes).mp4_bytes_with_one_h264_stream_and_one_aac_stream
+        try:
+            mp4_bytes = remux(mp3_bytes=mp3_bytes).mp4_bytes_with_one_h264_stream_and_one_aac_stream
+        except Exception as e:
+            logger.error(f"Remux failed! {e}\n{sys.exc_info()}")
         yield VoiceNote(mp4_bytes=mp4_bytes)
     elif message_body.startswith("wettest"):
         username = Peers.get(message.from_jid, conn=conn)
