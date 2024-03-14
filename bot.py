@@ -133,8 +133,11 @@ def process_authenticated_chat_message(
         mp3_bytes = ai.tts(completion)
         try:
             mp4_bytes = remux(mp3_bytes=mp3_bytes).mp4_bytes_with_one_h264_stream_and_one_aac_stream
+            logger.info("Remux succeeded.")
         except Exception as e:
             logger.error(f"Remux failed! {e}\n{sys.exc_info()}")
+
+        logger.info("Yielding voice note...")
         yield VoiceNote(mp4_bytes=mp4_bytes)
     elif message_body.startswith("wettest"):
         username = Peers.get(message.from_jid, conn=conn)
@@ -203,8 +206,6 @@ class Wettest(KikClientCallback):
     def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
         self.online_status = True
         from_jid = chat_message.from_jid
-
-        logger.info(f"[+] '{from_jid}' says: {chat_message.body}")
 
         global shuffle_word
         word = shuffle_word.get(from_jid)
@@ -387,7 +388,6 @@ class Wettest(KikClientCallback):
             self.client.send_chat_message(self.my_jid, "This is a message to myself to check if I am online.")
             time.sleep(2)
             if self.online_status:
-                logger.info("Bot is online!")
                 return True
 
             self.kik_authenticated = None
@@ -476,7 +476,6 @@ class WettestSlave(KikClientCallback):
             self.client.send_chat_message(self.my_jid, "This is a message to myself to check if I am online.")
             time.sleep(2)
             if self.online_status:
-                logger.info("Bot is online!")
                 return True
 
             self.kik_authenticated = None
@@ -517,7 +516,6 @@ if __name__ == '__main__':
 
     while True:
         time.sleep(120)
-        logger.info("Refreshing...")
         while not bot.refresh():
             logger.info("Refresh failed. Trying again soon...")
             time.sleep(30)

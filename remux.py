@@ -12,6 +12,7 @@ logger = get_logger()
 class KikMp4:
     mp4_bytes_with_one_h264_stream_and_one_aac_stream: bytes
 
+
 def remux(mp3_bytes: bytes) -> KikMp4:
     with tempfile.NamedTemporaryFile(suffix='.mp3') as temp_mp3_file, \
          tempfile.NamedTemporaryFile(suffix='.mp4') as temp_mp4_file:
