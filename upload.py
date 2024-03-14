@@ -76,6 +76,7 @@ def _send(
         'x-kik-content-extension': '.mp4'
     }
     # Sometimes Kik's servers throw 5xx when they're having issues, the new thread won't handle the exception
+    log.info("Starting content upload...")
     Thread(
         target=_content_upload_thread,
         args=(url, video, headers),
@@ -90,3 +91,4 @@ def _content_upload_thread(
     if r.status_code != 200:
         log.error(f"failed to upload video {r.status_code}")
         raise KikUploadError(r.status_code, r.reason)
+    log.info("Upload completed.")

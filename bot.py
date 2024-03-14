@@ -231,18 +231,18 @@ class Wettest(KikClientCallback):
         if not auth(from_jid):
             return
 
-        for message in process_authenticated_chat_message(self.client, chat_message, associated_jid=from_jid):
-            if isinstance(message, str):
-                self.client.send_chat_message(from_jid, message)
-            elif isinstance(message, bytes):
-                self.client.send_chat_image(from_jid, message)
-            elif isinstance(message, VoiceNote):
-                logger.info(f"Sending a voice note from {len(message.mp4_bytes)} mp4 bytes...")
-                try:
+        try:
+            for message in process_authenticated_chat_message(self.client, chat_message, associated_jid=from_jid):
+                if isinstance(message, str):
+                    self.client.send_chat_message(from_jid, message)
+                elif isinstance(message, bytes):
+                    self.client.send_chat_image(from_jid, message)
+                elif isinstance(message, VoiceNote):
+                    logger.info(f"Sending a voice note from {len(message.mp4_bytes)} mp4 bytes...")
                     send_vn(self.client, from_jid, message.mp4_bytes, is_group=False)
-                except Exception as e:
-                    logger.info(f"An error occurred sending voice note {e}\n{sys.exc_info()}")
-                logger.info("Voice note sent!")
+                    logger.info("Voice note sent!")
+        except Exception as e:
+            logger.error(f"Something went wrong processing authenticated messages... {e}", exc_info=1)
 
     def on_message_delivered(self, response: chatting.IncomingMessageDeliveredEvent):
         pass
