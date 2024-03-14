@@ -33,7 +33,7 @@ def remux(mp3_bytes: bytes) -> KikMp4:
         ]
 
         logger.info("ffmpeg: Starting...")
-        subprocess.run(command, check=True, stdout=logfile)
+        subprocess.run(command, check=True, stdout=logfile, stderr=subprocess.STDOUT)
         logger.info("ffmpeg: Completed. Seeking...")
 
         temp_mp4_file.seek(0)
