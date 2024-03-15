@@ -15,7 +15,7 @@ class PersistenceMixin:
         with open(path, "w") as f:
             # https://github.com/python/mypy/issues/14941
             f.write(yaml.dump(asdict(self)))  # type: ignore
-            logger.info(f"Wrote to {path.absolute}")
+            logger.info(f"Wrote to {path.absolute()}")
 
     @classmethod
     def read(cls, where: str, *, default_ctor: Callable[[], typing.Any]) -> typing.Any:

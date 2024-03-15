@@ -9,3 +9,4 @@ peers.yaml
 *.backup
 trigger_specs.yaml
 *.db
+ffmpeg.log
