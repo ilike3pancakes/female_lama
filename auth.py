@@ -13,10 +13,6 @@ admin_from_jid_prefixes = {
     "hmvrgi7tpv5by6qqk252khwednv5zlwxd3kiyuzqrnjjcra67boq_",  # Kat@friendzandmusic
     "wwafkxej3w4hlobauwcyhopmeudw4lfoqr2eqeh7sril6yijouea_",  # wetter@friendzandmusic
 
-    "6gbvbz4budh7yhwxsijjdklyka7klats3bhsh6lh4aspzfywi44q_",  # wetter@coven
-    "zkw2ncbf7euiilw4iguwwtkemrhrnpgrqynaa3y7afwhef7mtpoq_",  # ilike3pancakes@coven
-    "5hbwwosipuzzpxkp3wsgk24cpcwfck3qg7ounznl4vmzvlgjbwoa_",  # maze@coven
-
     "2cgtgby2hjsyqf7ec3m6iwkgrn5mmqieaigporcaywhme6t5uncq_",  # Boney@WeeklyGroup
     "xfouihqbab7z4gj22c4tnwczhs42k3jcxfefxv2gjhhlbcqmj56a_",  # ilike3pancakes@WeeklyGroup
     "2zlonhc7h6p4fho5piltyoq2t56j6gkow74tzidugapsdeemumga_",  # Ginger@WeeklyGroup
@@ -41,6 +37,9 @@ admin_from_jid_prefixes = {
     "bkzacon26m4a54lhknm5tqozqq6booelrfxtjoewct4jjw7w34bq_",  # Prophet@booksbanter
     "qetderkeqgok4ujutyc3othdyzsg5zl2bs6k4gjpcldonrvjpvdq_",  # Vixxxy@booksbanter
     "jskmozxcjdvmtf27xej72i57oycuudtgaxggn2fqcquwyexj3mhq_",  # trashcomp@booksb
+
+    "ln6xb6ruj6fuct55ydxryrl6atwhdkhfsnrxsxefb5ilw4gvhqvq_",  # ilike3@thelobby
+    "v7byq4ucieetx2cj4zniv6tvmqpw7blkiqtyntp4qlamurudsyea_",  # maze@thelobby
 }
 
 
