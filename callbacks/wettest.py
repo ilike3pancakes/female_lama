@@ -204,6 +204,8 @@ class Wettest(KikClientCallback):
         if not auth(from_jid):
             return
 
+        self.client.add_friend(from_jid)
+
         try:
             for message in process_authenticated_chat_message(self.client, chat_message, associated_jid=from_jid, conn=self.sql):
                 if isinstance(message, str):
