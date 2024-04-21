@@ -40,6 +40,8 @@ admin_from_jid_prefixes = {
 
     "ln6xb6ruj6fuct55ydxryrl6atwhdkhfsnrxsxefb5ilw4gvhqvq_",  # ilike3@thelobby
     "v7byq4ucieetx2cj4zniv6tvmqpw7blkiqtyntp4qlamurudsyea_",  # maze@thelobby
+    "i5loqys56xuzu7cjricp535chtqvxb3elnucvdvazkq54j5k22ua_",  # ramp@thelobby
+    "imfpfoi3usmuowyyfslsixoac2zeje7ud7qsj5o2xzmved3wngvq_",  # ready@lobby
 }
 
 
