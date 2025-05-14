@@ -4,7 +4,6 @@ import time
 import traceback
 import typing
 
-from callbacks.common.tempban import maybe_tempban, process_tempban
 from log import get_logger
 from auth import auth
 
@@ -24,7 +23,7 @@ class WettestSlave():
 
         raise NotImplemented()
 
-    def on_group_message_received(self, chat_message: typing: Any) -> None:
+    def on_group_message_received(self, chat_message: typing.Any) -> None:
         if not auth(chat_message.from_id):
             return
 

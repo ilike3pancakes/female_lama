@@ -17,11 +17,9 @@ from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 from log import get_logger
 from peers import Peers
 from points import atomic_incr
-from remux import remux
 import shuffle
 from trigger import create_trigger, evaluate_all_triggers, TriggerSpecs
 from urban import urban
-from xmpp import send_vn
 
 
 shuffle_word = dict()
