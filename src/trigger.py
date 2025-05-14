@@ -263,7 +263,8 @@ class Trigger:
                             return None
 
                     indices = [index_of(dictionary_mappings["standard"], ch) for ch in source]
-                    result = "".join([dictionary[index] if index else source[index] for index in indices])
+                    zipped = zip(source, indices)
+                    result = "".join([dictionary[index] if index else source for (source, index) in zipped])
                     stack.append(result)
                 else:
                     stack.append(token)  # literals, etc.

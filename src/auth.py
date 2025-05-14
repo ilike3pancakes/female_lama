@@ -1,6 +1,6 @@
 admin_from_user_id_prefixes = {
     "1053425852047700048",  # ilike3pancakes
-    "spacecat4712",
+    "754784265538895913",  # spacecat
 }
 
 
