@@ -9,8 +9,9 @@ import time
 import typing
 import yaml
 
+import discord
+
 from callbacks.wettest import Wettest
-from callbacks.wettest_slave import WettestSlave
 from log import get_logger
 
 
@@ -34,18 +35,9 @@ if __name__ == '__main__':
     with open(args.credentials) as f:
         creds: dict[str, typing.Any] = yaml.safe_load(f)
 
-    # create slave bots
-    slave_bots = [WettestSlave(slave_creds) for slave_creds in creds.get("slaves") if "slaves" in creds.keys()]
+    intents = discord.Intents.default()
+    intents.message_content = True
 
-    # create the bot
-    bot = Wettest(creds=creds, sql=conn)
+    bot = Wettest(sql=conn, intents=intents)
 
-    while True:
-        time.sleep(120)
-        while not bot.refresh():
-            logger.info("Refresh failed. Trying again soon...")
-            time.sleep(30)
-
-        for slave_bot in slave_bots:
-            if not slave_bot.refresh():
-                logger.info(f"Slave bot {slave_bot.my_jid} refresh failed.")
+    bot.run(creds["token"])

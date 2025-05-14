@@ -123,7 +123,7 @@ def _display_wrong_guesses() -> str:
 
 
 def get_state() -> str:
-    return f"{_display_wrong_guesses()}\n{HANGMAN_STAGES[_wrong_guesses]}\n{' '.join(_word_display)}"
+    return f"{_display_wrong_guesses()}\n```\n{HANGMAN_STAGES[_wrong_guesses]}\n{' '.join(_word_display)}\n```"
 
 
 if __name__ == "__main__":

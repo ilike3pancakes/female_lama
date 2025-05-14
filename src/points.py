@@ -26,7 +26,7 @@ class Points(PersistenceMixin):
         return Points(users=[])
 
 
-def atomic_incr(user_jid: str, displayname: Optional[str]) -> int:
+def atomic_incr(user_id: str, displayname: Optional[str]) -> int:
     """
     Increase the user's points by 1 and return the result.
 
@@ -35,15 +35,15 @@ def atomic_incr(user_jid: str, displayname: Optional[str]) -> int:
     points: Points = Points.read("points.yaml", default_ctor=Points.default_ctor)
 
     points_mapping = {user.jid: user.points for user in points.users}
-    new_points = points_mapping.get(user_jid, 0) + 1
+    new_points = points_mapping.get(user_id, 0) + 1
 
     points.users = [
-        UserPoints(jid=user_jid, displayname=displayname, points=new_points) if user.jid == user_jid else user
+        UserPoints(jid=user_id, displayname=displayname, points=new_points) if user.jid == user_id else user
         for user in points.users
     ]
 
-    if not any(user.jid == user_jid for user in points.users):
-        points.users.append(UserPoints(jid=user_jid, displayname=displayname, points=new_points))
+    if not any(user.jid == user_id for user in points.users):
+        points.users.append(UserPoints(jid=user_id, displayname=displayname, points=new_points))
 
     points.write("points.yaml")
 

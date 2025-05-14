@@ -8,6 +8,7 @@ dependencies = [
     "types-PyYAML==6.0.12.11",
     "mypy==1.4.1",
     "requests>=2.32.3,<3",
+    "discord-py>=2.5.2,<3",
 ]
 
 [tool.pixi.project]
