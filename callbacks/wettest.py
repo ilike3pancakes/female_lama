@@ -10,20 +10,9 @@ import traceback
 import typing
 from typing import Callable, Generator, Union
 
-import kik_unofficial.datatypes.xmpp.chatting as chatting  # type: ignore
-from kik_unofficial.callbacks import KikClientCallback  # type: ignore
-from kik_unofficial.client import KikClient  # type: ignore
-from kik_unofficial.datatypes.peers import User  # type: ignore
-from kik_unofficial.datatypes.xmpp.errors import SignUpError, LoginError  # type: ignore
-from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedResponse  # type: ignore
-from kik_unofficial.datatypes.xmpp.roster import FetchRosterResponse, PeersInfoResponse  # type: ignore
-from kik_unofficial.datatypes.xmpp.sign_up import RegisterResponse, UsernameUniquenessResponse  # type: ignore
-from kik_unofficial.datatypes.xmpp.xiphias import UsersResponse, UsersByAliasResponse  # type: ignore
-
 import ai
 import calculate
 from auth import auth
-from callbacks.common.tempban import maybe_tempban, process_tempban, group_to_last_status_user_jids
 from hangman import set_dictionary, hangman, get_state, get_word, HANGMAN_STAGES
 from log import get_logger
 from peers import Peers
@@ -46,11 +35,11 @@ async_queue: list[Callable[[], None]] = []
 
 @dataclass
 class VoiceNote:
-    mp4_bytes: bytes
+    mp3_bytes: bytes
 
 
 def process_authenticated_chat_message(
-        client: KikClient, message: chatting.IncomingChatMessage, *, associated_jid: str, conn: Connection,
+        client: typing.Any, message: typing.Any, *, associated_jid: str, conn: typing.Any,
 ) -> Generator[str | bytes | VoiceNote, None, None]:
     wettest_math = "wettest math"
     wettest_shuffle = "wettest shuffle"
@@ -64,9 +53,6 @@ def process_authenticated_chat_message(
         yield f"😮‍💨☝️🎲 {shuffled}"
     elif message_body.startswith(wettest_urban):
         yield f"😮‍💨☝️\n\n{urban(message.body[len(wettest_urban):].strip())}"
-    elif maybe_tempban(message):
-        for resp in process_tempban(client, message, associated_jid):
-            yield resp
     elif message_body.startswith(wettest_trigger):
         result = create_trigger(message.body[len(wettest_trigger):])
         if result.success:
@@ -92,26 +78,17 @@ def process_authenticated_chat_message(
     elif message_body.startswith("wettest vn "):
         yield "I'll record"
         completion = ai.wettest_gpt_completion_of(message.body[len("wettest vn "):])
-        mp3_bytes = ai.tts(completion)
-        try:
-            mp4_bytes = remux(mp3_bytes=mp3_bytes).mp4_bytes_with_one_h264_stream_and_one_aac_stream
-            logger.info("Remux succeeded.")
-        except Exception as e:
-            logger.error(f"Remux failed! {e}\n{sys.exc_info()}")
-
-        logger.info("Yielding voice note...")
-        yield VoiceNote(mp4_bytes=mp4_bytes)
+        yield VoiceNote(mp3_bytes=ai.tts(completion))
     elif message_body.startswith("wettest"):
         username = Peers.get(message.from_jid, conn=conn)
-        friendly = "Rompe" in username if username else False
+        friendly = "SpaceCat" in username if username else False
         yield ai.wettest_gpt_completion_of(message.body, friendly=friendly)
     elif len(message.body) == 1 and message.body in A_Z:
         username = Peers.get(message.from_jid, conn=conn)
         if not username or not any(
             [
-                "Rompe" in username,
                 "Blake" in username,
-                "Blas" in username,
+                "SpaceCat" in username,
             ]
         ):
             return
@@ -145,76 +122,49 @@ def reshuffle_word(associated_jid: str) -> str:
     return ''.join(shuffled)
 
 
-class Wettest(KikClientCallback):
-    def __init__(self, *, creds: dict[str, typing.Any], sql: Connection):
+class Wettest():
+    def __init__(self, *, creds: typing.Any, sql: Connection):
         self.creds = creds
         self.sql = sql
-        node = self.creds.get('node')
-        self.my_jid = node + "@talk.kik.com" if node else None
-        self.kik_authenticated = False
-        self.online_status = False
-        self.connect()
 
-    def connect(self):
-        device_id = self.creds['device_id']
-        android_id = self.creds['android_id']
-        username = self.creds['username']
-        node = self.creds.get('node')
-        password = self.creds.get('password')
-        if not password:
-            password = input('Password: ')
-            self.creds['password'] = password
+        self.client = Client(self)
 
-        self.client = KikClient(self, username, password, node, device_id=device_id, android_id=android_id)
-
-    def on_authenticated(self):
-        logger.info("Kik login successful!")
-        self.kik_authenticated = True
-        self.client.request_roster()
-
-    def on_login_ended(self, response: LoginResponse):
-        self.my_jid = response.kik_node + "@talk.kik.com"
-        logger.info(f"Saved JID {self.my_jid} for refreshing")
-
-    def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage):
-        self.online_status = True
-        from_jid = chat_message.from_jid
+    def on_chat_message_received(self, chat_message: typing.Any):
+        from_id = chat_message.from_id
 
         global shuffle_word
-        word = shuffle_word.get(from_jid)
+        word = shuffle_word.get(from_id)
         if word and chat_message.body and chat_message.body.strip() == word:
-            shuffle_word[from_jid] = None
-            display = Peers.get(from_jid, conn=self.sql) or "User"
+            shuffle_word[from_id] = None
+            display = Peers.get(from_id, conn=self.sql) or "User"
             self.client.send_chat_message(
-                from_jid,
-                f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(from_jid, display)} points"
+                from_id,
+                f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(from_id, display)} points"
             )
-            shuffled = reshuffle_word(from_jid)
-            self.client.send_chat_message(from_jid, f"What about {shuffled} ? 😮‍💨☝️")
+            shuffled = reshuffle_word(from_id)
+            self.client.send_chat_message(from_id, f"What about {shuffled} ? 😮‍💨☝️")
         elif word and chat_message.body and len(chat_message.body.strip().split(" ")) == 1:
             logger.info(f"{word} != {chat_message.body}")
 
         trigger_specs: TriggerSpecs = TriggerSpecs.read("trigger_specs.yaml", default_ctor=TriggerSpecs.default_ctor)
-        matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == from_jid]
+        matching_trigger_specs = [spec for spec in trigger_specs.specs if spec.associated_jid == from_id]
         matching_triggers = [create_trigger(spec.trigger_spec) for spec in matching_trigger_specs]
         matching_valid_triggers = [result.value for result in matching_triggers if result.success]
         for res in evaluate_all_triggers(chat_message.body, matching_valid_triggers, ["No one"], "Bruv"):
-            self.client.send_chat_message(from_jid, res)
+            self.client.send_chat_message(from_id, res)
 
-        if not auth(from_jid):
+        if not auth(from_id):
             return
 
-        self.client.add_friend(from_jid)
-
         try:
-            for message in process_authenticated_chat_message(self.client, chat_message, associated_jid=from_jid, conn=self.sql):
+            for message in process_authenticated_chat_message(self.client, chat_message, associated_jid=from_id, conn=self.sql):
                 if isinstance(message, str):
-                    self.client.send_chat_message(from_jid, message)
+                    self.client.send_chat_message(from_id, message)
                 elif isinstance(message, bytes):
-                    self.client.send_chat_image(from_jid, message)
+                    self.client.send_chat_image(from_id, message)
                 elif isinstance(message, VoiceNote):
-                    logger.info(f"Sending a voice note from {len(message.mp4_bytes)} mp4 bytes...")
-                    send_vn(self.client, from_jid, message.mp4_bytes, is_group=False)
+                    logger.info(f"Sending a voice note from {len(message.mp3_bytes)} mp3 bytes...")
+                    send_vn(self.client, from_id, message.mp3_bytes, is_group=False)
                     logger.info("Voice note sent!")
         except Exception as e:
             logger.error(f"Something went wrong processing authenticated messages... {e}", exc_info=1)
@@ -232,7 +182,7 @@ class Wettest(KikClientCallback):
     def on_group_message_received(self, chat_message: chatting.IncomingGroupChatMessage) -> None:
         group_jid = chat_message.group_jid
 
-        logger.info(f"[+] '{chat_message.from_jid}' from group ID {group_jid} says: {chat_message.body}")
+        logger.info(f"[+] '{chat_message.from_id}' from group ID {group_jid} says: {chat_message.body}")
 
         # Async processing hack.
         if len(async_queue):
@@ -244,11 +194,11 @@ class Wettest(KikClientCallback):
 
         t0 = datetime.datetime.utcnow()
 
-        Peers.insert(conn=self.sql, jid=chat_message.from_jid, group_jid=group_jid)
+        Peers.insert(conn=self.sql, jid=chat_message.from_id, group_jid=group_jid)
         duration = datetime.datetime.utcnow() - t0
         logger.info(f"Updated peers.yaml in {duration}")
 
-        display: str = Peers.get(chat_message.from_jid, conn=self.sql) or "User"
+        display: str = Peers.get(chat_message.from_id, conn=self.sql) or "User"
 
         peers = Peers.get_all_in_group_jid(group_jid=group_jid, conn=self.sql)
         group_peer_display_names = [peer.display_name for peer in peers if peer.display_name]
@@ -260,7 +210,7 @@ class Wettest(KikClientCallback):
             shuffle_word[group_jid] = None
             self.client.send_chat_message(
                 group_jid,
-                f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_jid, display)} points"
+                f"...correct {display} 😮‍💨☝️\n\nYou have {atomic_incr(chat_message.from_id, display)} points"
             )
             shuffled = reshuffle_word(group_jid)
             self.client.send_chat_message(group_jid, f"What about {shuffled} ? 😮‍💨☝️")
@@ -275,12 +225,12 @@ class Wettest(KikClientCallback):
             self.client.send_chat_message(group_jid, res)
 
         all_peers = Peers.get_all(conn=self.sql)
-        if chat_message.from_jid not in [peer.jid for peer in all_peers if peer.display_name]:
-            logger.info(f"Requesting peer info for {chat_message.from_jid}")
-            self.client.request_info_of_users(chat_message.from_jid)
-            self.client.xiphias_get_users(chat_message.from_jid)
+        if chat_message.from_id not in [peer.jid for peer in all_peers if peer.display_name]:
+            logger.info(f"Requesting peer info for {chat_message.from_id}")
+            self.client.request_info_of_users(chat_message.from_id)
+            self.client.xiphias_get_users(chat_message.from_id)
 
-        if not auth(chat_message.from_jid):
+        if not auth(chat_message.from_id):
             return
 
         for message in process_authenticated_chat_message(self.client, chat_message, associated_jid=group_jid, conn=self.sql):
@@ -289,96 +239,6 @@ class Wettest(KikClientCallback):
             elif isinstance(message, bytes):
                 self.client.send_chat_image(group_jid, message)
             elif isinstance(message, VoiceNote):
-                logger.info(f"Sending a voice note from {len(message.mp4_bytes)} mp4 bytes...")
-                send_vn(self.client, group_jid, message.mp4_bytes, is_group=True)
+                logger.info(f"Sending a voice note from {len(message.mp3_bytes)} mp3 bytes...")
+                send_vn(self.client, group_jid, message.mp3_bytes, is_group=True)
                 logger.info("Voice note sent!")
-
-    def on_is_typing_event_received(self, response: chatting.IncomingIsTypingEvent):
-        pass
-
-    def on_group_is_typing_event_received(self, response: chatting.IncomingGroupIsTypingEvent):
-        pass
-
-    def on_roster_received(self, response: FetchRosterResponse):
-        users = [peer.jid for peer in response.peers if isinstance(peer, User)]
-
-        self.client.xiphias_get_users(users)
-
-    def on_friend_attribution(self, response: chatting.IncomingFriendAttribution):
-        logger.info(f"[+] Friend attribution request from {response.referrer_jid}")
-
-    def on_image_received(self, image_message: chatting.IncomingImageMessage):
-        pass
-
-    def on_video_received(self, video_message: chatting.IncomingVideoMessage):
-        pass
-
-    def on_peer_info_received(self, response: PeersInfoResponse):
-        logger.info(f"[+] Peer info for {len(response.users)} users")
-
-        for user in response.users:
-            # Note: username is often "Username unavailable"
-            Peers.insert(conn=self.sql, jid=user.jid, display_name=user.display_name)
-
-    def on_group_status_received(self, response: chatting.IncomingGroupStatus):
-        group_to_last_status_user_jids[response.group_jid] = response.status_jid
-        logger.info(
-            f"Received status message in {response.group_jid} -- {response.status} -- status_jid={response.status_jid}"
-        )
-
-    def on_group_receipts_received(self, response: chatting.IncomingGroupReceiptsEvent):
-        pass
-
-    def on_status_message_received(self, response: chatting.IncomingStatusResponse):
-        pass
-
-    def on_username_uniqueness_received(self, response: UsernameUniquenessResponse):
-        logger.info(f"Is {response.username} a unique username? {response.unique}")
-
-    def on_sign_up_ended(self, response: RegisterResponse):
-        logger.info(f"[+] Registered as {response.kik_node}")
-
-    def on_connection_failed(self, response: ConnectionFailedResponse):
-        logger.info("Connection failed!")
-        self.kik_authenticated = False
-
-        logger.info(f"[-] Connection failed: {response.message}")
-
-    def on_login_error(self, login_error: LoginError):
-        logger.info("Kik login failed!")
-        self.kik_authenticated = False
-
-        if login_error.is_captcha():
-            login_error.solve_captcha_wizard(self.client)
-
-    def on_register_error(self, response: SignUpError):
-        logger.info(f"[-] Register error: {response.message}")
-
-    def on_disconnected(self):
-        logger.warning(f"\n---Disconnected---\n")
-
-    def refresh(self) -> bool:
-        try:
-            self.online_status = False
-            if not self.my_jid:
-                logger.info("Don't have my JID")
-                return False
-
-            self.client.send_chat_message(self.my_jid, "This is a message to myself to check if I am online.")
-            time.sleep(2)
-            if self.online_status:
-                return True
-
-            self.kik_authenticated = None
-            logger.info("Reconnecting...")
-            self.client.disconnect()
-            self.connect()
-
-            while not self.kik_authenticated:
-                time.sleep(1)
-
-            return self.kik_authenticated
-        except Exception as e:
-            traceback.print_exc()
-            logger.info(f"Something went wrong while refreshing! {e}")
-            return False
