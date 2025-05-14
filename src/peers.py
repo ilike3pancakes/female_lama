@@ -79,6 +79,6 @@ if __name__ == "__main__":
     Peers.insert(conn=conn, jid="overwrite", display_name="Overwritten!")
     print(Peers.get("overwrite", conn=conn))
 
-    conn2 = sqlite3.connect("prod.db")
+    conn2 = sqlite3.connect("../prod.db")
     peers = Peer.load_all(conn=conn2)
     print([peer for peer in peers if peer.display_name])

@@ -136,7 +136,7 @@ client = OpenAI()
 
 def wettest_gpt_completion_of(body: str, *, friendly: bool = False) -> str:
     response = client.chat.completions.create(
-      model="gpt-4",
+      model="gpt-4o-mini",
       messages=[
           {"role": "system", "content": "You are a dramatic chat user."},
           {"role": "user", "content": (PROMPT_FRIENDLY if friendly else PROMPT) + body},

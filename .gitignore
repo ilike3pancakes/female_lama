@@ -10,3 +10,5 @@ peers.yaml
 trigger_specs.yaml
 *.db
 ffmpeg.log
+.pixi/
+*.egg-info/
