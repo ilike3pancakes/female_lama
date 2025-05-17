@@ -3,9 +3,10 @@ Description=wettest
 Wants=sshd.service
 
 [Service]
-ExecStart=/usr/bin/python3.7 bot.py -c creds.yaml
+ExecStart=/home/pi/pixi run bot
 RestartSec=5
-WorkingDirectory=/home/pi/Documents/female_lama/
+WorkingDirectory=/home/pi/female_lama/
 Restart=always
-RuntimeMaxSec=8hr
-RuntimeRandomizedExtraSec=1hr
+
+[Install]
+WantedBy=multi-user.target
